@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { Button, Form, Input, Segment, Grid, Header, Icon } from 'semantic-ui-react';
+import Registration from './Registration';
 
-interface LoginFormData {
+interface SignupFormData {
   email: string;
   password: string;
+  otp: string;
 }
 
-function Login() {
-  const [formData, setFormData] = useState<LoginFormData>({
+function Signup() {
+  const [formData, setFormData] = useState<SignupFormData>({
     email: '',
-    password: ''
+    password: '',
+    otp: ''
   });
+
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, { name, value }: any) => {
     setFormData(prevState => ({
@@ -21,9 +26,12 @@ function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login data submitted:', formData);
-    // Add form submission logic here
+    setIsRegistered(true);
   };
+
+  if (isRegistered) {
+    return <Registration email={formData.email} />;
+  }
 
   return (
     <Grid textAlign='center' style={{ height: '100vh', paddingTop: '4em', backgroundColor: '#f9f9f9' }} verticalAlign='middle'>
@@ -37,8 +45,8 @@ function Login() {
           }}
         >
           <Header as='h2' icon textAlign='center'>
-            <Icon name='sign in' circular />
-            <Header.Content>Login to Job Portal</Header.Content>
+            <Icon name='signup' circular />
+            <Header.Content>Signup for Job Portal</Header.Content>
           </Header>
           <Form onSubmit={handleSubmit} style={{ marginTop: '2em' }}>
             <Form.Field>
@@ -65,7 +73,19 @@ function Login() {
                 iconPosition='left'
               />
             </Form.Field>
-            <Button type='submit' color='blue' fluid size='large' style={{ marginTop: '2em' }}>Login</Button>
+            <Form.Field>
+              <label>OTP</label>
+              <Input
+                type='text'
+                placeholder='OTP'
+                name='otp'
+                value={formData.otp}
+                onChange={handleChange}
+                icon='key'
+                iconPosition='left'
+              />
+            </Form.Field>
+            <Button type='submit' color='blue' fluid size='large' style={{ marginTop: '2em' }}>Signup</Button>
           </Form>
         </Segment>
       </Grid.Column>
@@ -73,4 +93,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Signup;

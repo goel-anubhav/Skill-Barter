@@ -1,5 +1,7 @@
 import 'semantic-ui-css/semantic.min.css';
-import Registration from './Components/Registration';
+
+import Signup from './Components/Signup';
+import Login from './Components/Login';
 
 
 function App() {
@@ -7,7 +9,7 @@ function App() {
 
   return (
     <>
-    <Registration/>
+    <Signup/>
      
     </>
   )
