@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "semantic-ui-css": "^2.5.0",
+    "semantic-ui-react": "^2.1.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
