@@ -32,7 +32,7 @@ const JobTable = () => {
             <TableCaption>A list of your recent posted jobs</TableCaption>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Person Name</TableHead>
+                    <TableHead>Company Name</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Action</TableHead>

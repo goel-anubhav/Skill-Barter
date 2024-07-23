@@ -66,7 +66,7 @@ const Login = () => {
                             name="email"
                             value={input.email}
                             onChange={changeEventHandler}
-                            placeholder="SkillBarter@gmail.com"
+                            placeholder="Enter a valid Email Address"
                         />
                     </div>
                     <div className='my-2'>
@@ -76,31 +76,10 @@ const Login = () => {
                             name="password"
                             value={input.password}
                             onChange={changeEventHandler}
-                            placeholder="password"
+                            placeholder="Enter a Strong Password"
                         />
                     </div>
-                    <RadioGroup defaultValue="comfortable" className="flex items-center gap-4 my-5">
-                        <div className="flex items-center space-x-2">
-                            <input
-                                type="radio"
-                                name="role"
-                                value="student"
-                                checked={input.role === 'student'}
-                                onChange={changeEventHandler}
-                            />
-                            <Label htmlFor="r1">Students</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <input
-                                type="radio"
-                                name="role"
-                                value="recruiter"
-                                checked={input.role === 'recruiter'}
-                                onChange={changeEventHandler}
-                            />
-                            <Label htmlFor="r2">Recruiter</Label>
-                        </div>
-                    </RadioGroup>
+
                     {
                         loading ? (
                             <Button className='w-full my-4'>
