@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './App.css'
 import Jobs from './components/Jobs'
-import Home from './components/Home'
+import Home from './components/home'
 import JobDescription from './components/JobDescription'
 import Login from './components/auth/Login'
 import Singup from './components/auth/Singup'
@@ -14,6 +14,8 @@ import Browse from './components/Browse'
 import CreateJobs from './components/admin/CreateJobs'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import Applicants from './components/admin/Applicants'
+import 'semantic-ui-css/semantic.min.css';
+
 
 const appRouter = createBrowserRouter([
   {
