@@ -53,7 +53,7 @@ const CustomNavbar = () => {
             </Nav.Link>
             <Nav.Link
               as={Link}
-              to="/browse"
+              to="/locations"
               className="font-weight-bold"
               style={{
                 color: "black",
@@ -66,7 +66,7 @@ const CustomNavbar = () => {
                 e.currentTarget.style.color = "black";
               }}
             >
-              Browse
+              Locations
             </Nav.Link>
             <Nav.Link as={Link} to="/Login">
               <Button

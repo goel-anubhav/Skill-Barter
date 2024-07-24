@@ -1,26 +1,36 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import CustomNavbar from "./shared/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-
+import Footer from "./shared/footer"; // Ensure this import is correct
 import LandingPage from "./components/landingpage";
+import SkillsPage from "./components/skillsPage";
+import LocationFile from "./components/locationFile";
 import Login from "./auth/login";
 import SignupForm from "./auth/signup";
+import Registration from "./auth/registration";
+import ConfirmationPage from "./components/confirmationPage";
 
 function App() {
   return (
     <div className="App">
       <Router>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          {/* Uncomment the following lines as you create these components */}
-          {/* <Route path="/skills" element={<Skills />} />
-          <Route path="/browse" element={<Browse />} />
-          */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignupForm />} />
-        </Routes>
+        {/* <CustomNavbar /> */}
+        <div className="content">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignupForm />} />
+            <Route path="/registration" element={<Registration />} />
+            <Route path="/locations" element={<LocationFile />} />
+            <Route path="/skills" element={<SkillsPage />} />
+            <Route
+              path="/Confirm-registration"
+              element={<ConfirmationPage />}
+            />
+          </Routes>
+        </div>
+        <Footer />
       </Router>
     </div>
   );
