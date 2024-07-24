@@ -23,12 +23,12 @@ function SignupForm() {
 
   return (
     <>
-      <CustomNavbar />
-      <div className="container d-flex justify-content-center align-items-start vh-100 pt-2">
-        <div
-          className="card p-4 w-100"
-          style={{ maxWidth: "600px", marginTop: "60px" }}
-        >
+      <CustomNavbar className="fixed-top" />
+      <div
+        className="container d-flex justify-content-center align-items-start vh-100 pt-2"
+        style={{ marginTop: "70px" }}
+      >
+        <div className="card p-4 w-100" style={{ maxWidth: "600px" }}>
           <h3 className="text-center">Sign Up</h3>
           <form>
             <div className="form-group">
