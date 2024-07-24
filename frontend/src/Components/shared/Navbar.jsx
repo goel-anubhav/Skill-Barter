@@ -17,8 +17,8 @@ const Navbar = () => {
                         {
                             authUser && authUser.role === "recruiter" ? (
                                 <>
-                                    <li className='hover:text-[#6A38C2] cursor-pointer'><Link to={"/admin/companies"}>Companies</Link></li>
-                                    <li className='hover:text-[#6A38C2] cursor-pointer'><Link to={"/admin/jobs"}>Jobs</Link></li>
+                                    <li className='hover:text-[#6A38C2] cursor-pointer'><Link to={"/admin/companies"}>Locations</Link></li>
+                                    <li className='hover:text-[#6A38C2] cursor-pointer'><Link to={"/admin/jobs"}>Skills</Link></li>
                                 </>
                             ) : (
                                 <>

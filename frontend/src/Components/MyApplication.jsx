@@ -10,7 +10,7 @@ const MyApplication = () => {
         <>
             <Navbar />
             <div className='max-w-7xl mx-auto'>
-                <h1 className='font-bold my-5'>Total Dreamed Jobs Jobs</h1>
+                <h1 className='font-bold my-5'>Total Applied Jobs</h1>
                 <ApplicationTable />
             </div>
         </>
