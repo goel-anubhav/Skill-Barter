@@ -9,6 +9,7 @@ import LocationFile from "./components/locationFile";
 import Login from "./auth/login";
 import SignupForm from "./auth/signup";
 import Registration from "./auth/registration";
+import ConfirmationPage from "./components/confirmationPage";
 
 function App() {
   return (
@@ -23,6 +24,10 @@ function App() {
             <Route path="/registration" element={<Registration />} />
             <Route path="/locations" element={<LocationFile />} />
             <Route path="/skills" element={<SkillsPage />} />
+            <Route
+              path="/Confirm-registration"
+              element={<ConfirmationPage />}
+            />
           </Routes>
         </div>
         <Footer />

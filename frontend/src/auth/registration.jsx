@@ -5,6 +5,7 @@ import { statesOfIndia } from "./states";
 import { qualifications } from "./qualifications";
 import CustomNavbar from "../shared/Navbar";
 import { skillsOptions } from "./skills";
+import { useNavigate } from "react-router-dom";
 
 const years = Array.from({ length: 31 }, (_, i) => ({
   value: i,
@@ -52,10 +53,10 @@ function Registration({ email }) {
     }
   };
 
+  const navigate = useNavigate();
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("Form data submitted:", formData);
-    // Add your form submission logic here
+    navigate("/confirm-registration");
   };
 
   return (
