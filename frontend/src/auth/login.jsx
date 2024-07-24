@@ -5,10 +5,10 @@ import CustomNavbar from "../shared/Navbar";
 function Login() {
   return (
     <>
-      <CustomNavbar />
+      <CustomNavbar className="fixed-top" />
       <div
         style={{
-          height: "calc(100vh - 210px)", // Adjust based on your navbar height, 56px is common for Bootstrap
+          height: "calc(100vh - 230px)", // Adjust based on your navbar height, 56px is common for Bootstrap
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -29,6 +29,7 @@ function Login() {
                 className="form-control"
                 id="email"
                 placeholder="Enter a valid Email Address"
+                autoComplete="off"
                 required
               />
             </div>
@@ -41,6 +42,7 @@ function Login() {
                 className="form-control"
                 id="password"
                 placeholder="Enter a Strong Password"
+                autoComplete="off"
                 required
               />
             </div>

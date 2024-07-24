@@ -12,7 +12,6 @@ function App() {
   return (
     <div className="App">
       <Router>
-        {/* <CustomNavbar /> */}
         <Routes>
           <Route path="/" element={<LandingPage />} />
           {/* Uncomment the following lines as you create these components */}
