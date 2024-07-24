@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import CustomNavbar from "../shared/Navbar";
-import MDBfooter from "../shared/footer";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -183,7 +182,6 @@ function LandingPage() {
           Latest and Top Job Openings
         </h3>
       </div>
-      <MDBfooter />
     </>
   );
 }

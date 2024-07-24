@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-
+import Footer from "./shared/footer"; // Ensure this import is correct
 import CustomNavbar from "./shared/Navbar";
 import LandingPage from "./components/landingpage";
 import Login from "./auth/login";
@@ -14,15 +14,15 @@ function App() {
     <div className="App">
       <Router>
         {/* <CustomNavbar /> */}
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          {/* Uncomment the following lines as you create these components */}
-          {/* <Route path="/skills" element={<Skills />} />
-          <Route path="/browse" element={<Browse />} /> */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignupForm />} />
-          <Route path="/registration" element={<Registration />} />
-        </Routes>
+        <div className="content">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignupForm />} />
+            <Route path="/registration" element={<Registration />} />
+          </Routes>
+        </div>
+        <Footer />
       </Router>
     </div>
   );
