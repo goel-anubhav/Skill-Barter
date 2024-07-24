@@ -1,51 +1,30 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import './App.css'
-import Jobs from './components/Jobs'
-import Home from './components/Home'
-import JobDescription from './components/JobDescription'
-import Login from './components/auth/Login'
-import Singup from './components/auth/Signup'
-import Profile from './components/Profile'
-import Browse from './components/Browse'
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import CustomNavbar from "./shared/Navbar";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
-const appRouter = createBrowserRouter([
-  {
-    path: "/",
-    element: <Home />
-  },
-  {
-    path: "/jobs",
-    element: <Jobs />
-  },
-  {
-    path: "/description/:id",
-    element: <JobDescription />
-  },
-  {
-    path: "/browse",
-    element: <Browse />
-  },
-  {
-    path: "/login",
-    element: <Login />
-  },
-  {
-    path: "/signup",
-    element: <Singup />
-  },
-  {
-    path:"/profile",
-    element: <Profile/>
-  },
-  // Admin Dashboard Route Started
-])
+import LandingPage from "./components/landingpage";
+import Login from "./auth/login";
+import SignupForm from "./auth/signup";
 
 function App() {
   return (
-    <div>
-      <RouterProvider router={appRouter} />
+    <div className="App">
+      <Router>
+        {/* <CustomNavbar /> */}
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          {/* Uncomment the following lines as you create these components */}
+          {/* <Route path="/skills" element={<Skills />} />
+          <Route path="/browse" element={<Browse />} />
+          */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignupForm />} />
+        </Routes>
+      </Router>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
