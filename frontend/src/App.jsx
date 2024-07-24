@@ -7,6 +7,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import LandingPage from "./components/landingpage";
 import Login from "./auth/login";
 import SignupForm from "./auth/signup";
+import Registration from "./auth/registration";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignupForm />} />
+          {/* <Route path="/registration" component={Registration} /> */}
         </Routes>
       </Router>
     </div>

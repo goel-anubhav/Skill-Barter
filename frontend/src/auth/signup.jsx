@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import CustomNavbar from "../shared/Navbar";
 
 function SignupForm() {
   const [otpSent, setOtpSent] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const navigate = useNavigate();
 
   const handleSendOtp = () => {
     setOtpSent(true);
@@ -21,6 +23,12 @@ function SignupForm() {
     }
   };
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Add your form submission logic here
+    navigate("/registration"); // Redirect to the registration page
+  };
+
   return (
     <>
       <CustomNavbar className="fixed-top" />
@@ -29,8 +37,8 @@ function SignupForm() {
         style={{ marginTop: "70px" }}
       >
         <div className="card p-4 w-100" style={{ maxWidth: "600px" }}>
-          <h3 className="text-center">Sign Up</h3>
-          <form>
+          <h3 className="text-center mb-4">Sign Up</h3>
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="fullName" className="font-weight-bold">
                 Full Name
@@ -39,6 +47,7 @@ function SignupForm() {
                 type="text"
                 className="form-control"
                 id="fullName"
+                name="fullName"
                 placeholder="Enter your full name"
                 autoComplete="off"
               />
@@ -51,6 +60,7 @@ function SignupForm() {
                 type="email"
                 className="form-control"
                 id="email"
+                name="email"
                 placeholder="Enter your email"
                 autoComplete="off"
               />
@@ -73,6 +83,7 @@ function SignupForm() {
                   type="text"
                   className="form-control"
                   id="otp"
+                  name="otp"
                   placeholder="Enter the OTP"
                   autoComplete="off"
                 />
@@ -86,6 +97,7 @@ function SignupForm() {
                 type="text"
                 className="form-control"
                 id="phoneNumber"
+                name="phoneNumber"
                 placeholder="Enter your phone number"
                 autoComplete="off"
               />
@@ -98,6 +110,7 @@ function SignupForm() {
                 type="password"
                 className="form-control"
                 id="password"
+                name="password"
                 placeholder="Enter your password"
                 autoComplete="off"
               />
@@ -111,6 +124,7 @@ function SignupForm() {
                   type="file"
                   className="form-control-file"
                   id="profilePicture"
+                  name="profilePicture"
                   onChange={handleImageChange}
                   style={{ display: "none" }}
                 />
@@ -123,11 +137,16 @@ function SignupForm() {
                 </label>
               </div>
               {selectedImage && (
-                <div className="mt-2">
+                <div className="mt-2 text-center">
                   <img
                     src={selectedImage}
                     alt="Selected"
-                    style={{ width: "100%" }}
+                    style={{
+                      maxWidth: "100%",
+                      height: "auto",
+                      maxHeight: "200px",
+                      marginTop: "10px",
+                    }}
                   />
                 </div>
               )}
