@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import Navbar from '../shared/Navbar'
-import { Label } from '../ui/label'
-import { Input } from '../ui/input'
-import { Button } from '../ui/button'
-import { RadioGroup } from '../ui/radio-group'
-import axios from 'axios'
-import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
-import { useDispatch, useSelector } from 'react-redux'
-import { setLoading } from '@/redux/authSlice'
-import { Loader2 } from 'lucide-react'
+import React, { useEffect, useState } from 'react';
+import Navbar from '../shared/Navbar';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useDispatch, useSelector } from 'react-redux';
+import { setLoading } from '@/redux/authSlice';
+import { Loader2 } from 'lucide-react';
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -21,6 +20,7 @@ const Signup = () => {
     file: "",
     otp: "",
   });
+  const [preview, setPreview] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
   const { loading, authUser } = useSelector(store => store.auth);
   const dispatch = useDispatch();
@@ -29,8 +29,17 @@ const Signup = () => {
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
+
   const changeFileHandler = (e) => {
-    setInput({ ...input, file: e.target.files?.[0] });
+    const file = e.target.files?.[0];
+    setInput({ ...input, file });
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const sendOtpHandler = async () => {
@@ -100,7 +109,7 @@ const Signup = () => {
     <>
       <Navbar />
       <div className='flex items-center justify-center max-w-7xl mx-auto'>
-        <form onSubmit={submitHandler} className='w-full max-w-md border border-gray-200 rounded-md p-6 my-10'>
+        <form onSubmit={submitHandler} className='w-full max-w-md border border-gray-200 rounded-md p-6 my-10' autoComplete="off">
           <h1 className='font-bold text-2xl mb-6 text-center'>Sign Up</h1>
           <div className='my-4'>
             <Label>Full Name</Label>
@@ -111,6 +120,7 @@ const Signup = () => {
               onChange={changeEventHandler}
               placeholder="Enter your full name"
               className="mt-1 w-full p-2 border rounded"
+              autoComplete="off"
             />
           </div>
           <div className='my-4'>
@@ -122,6 +132,7 @@ const Signup = () => {
               onChange={changeEventHandler}
               placeholder="Enter your email"
               className="mt-1 w-full p-2 border rounded"
+              autoComplete="off"
             />
             <Button type="button" onClick={sendOtpHandler} className='mt-2 w-full'>
               {otpSent ? "Resend OTP" : "Send OTP"}
@@ -137,6 +148,7 @@ const Signup = () => {
                 onChange={changeEventHandler}
                 placeholder="Enter the OTP"
                 className="mt-1 w-full p-2 border rounded"
+                autoComplete="off"
               />
               <Button type="button" onClick={verifyOtpHandler} className='mt-2 w-full'>
                 Verify OTP
@@ -152,6 +164,7 @@ const Signup = () => {
               onChange={changeEventHandler}
               placeholder="Enter your phone number"
               className="mt-1 w-full p-2 border rounded"
+              autoComplete="off"
             />
           </div>
           <div className='my-4'>
@@ -163,21 +176,45 @@ const Signup = () => {
               onChange={changeEventHandler}
               placeholder="Enter your password"
               className="mt-1 w-full p-2 border rounded"
+              autoComplete="off"
             />
-          </div>
-          <div className='my-4'>
-            
           </div>
           <div className='my-4'>
             <Label>Profile Picture</Label>
             <div className="flex items-center mt-2">
+              <label htmlFor="file-upload" style={{
+                display: 'inline-block',
+                padding: '8px 12px',
+                cursor: 'pointer',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'background-color 0.3s ease'
+              }}>
+                Choose File
+              </label>
               <input
+                id="file-upload"
                 accept="image/*"
                 type="file"
                 onChange={changeFileHandler}
-                className="cursor-pointer"
+                style={{ display: 'none' }}
+                autoComplete="off"
               />
+              <span className="ml-2">{input.file ? input.file.name : "No file chosen"}</span>
             </div>
+            {preview && (
+              <div className="mt-4">
+                <img src={preview} alt="Selected Profile" style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  borderRadius: '4px'
+                }} />
+              </div>
+            )}
           </div>
           {
             loading ? (
@@ -196,4 +233,4 @@ const Signup = () => {
   )
 }
 
-export default Signup
+export default Signup;

@@ -6,14 +6,7 @@ import JobDescription from './components/JobDescription'
 import Login from './components/auth/Login'
 import Singup from './components/auth/Signup'
 import Profile from './components/Profile'
-import PostJob from './components/PostedJobs'
-import Companies from './components/Companies'
-import CompanySetup from './components/CompanySetup'
-import CompanyCreate from './components/CompanyCreate'
 import Browse from './components/Browse'
-import CreateJobs from './components/admin/CreateJobs'
-import ProtectedRoute from './components/admin/ProtectedRoute'
-import Applicants from './components/admin/Applicants'
 
 const appRouter = createBrowserRouter([
   {
@@ -45,30 +38,6 @@ const appRouter = createBrowserRouter([
     element: <Profile/>
   },
   // Admin Dashboard Route Started
-  {
-    path:"/admin/jobs",
-    element:<ProtectedRoute><PostJob/></ProtectedRoute> 
-  },
-  {
-    path:"/admin/jobs/create",
-    element:<ProtectedRoute><CreateJobs/></ProtectedRoute> 
-  },
-  {
-    path:"/admin/jobs/:id/applicants",
-    element:<ProtectedRoute><Applicants/></ProtectedRoute> 
-  },
-  {
-    path:"/admin/companies",
-    element:<ProtectedRoute><Companies/></ProtectedRoute>
-  },
-  {
-    path:"/admin/companies/create",
-    element:<ProtectedRoute><CompanyCreate/></ProtectedRoute> 
-  },
-  {
-    path:"/admin/companies/:id",
-    element:<ProtectedRoute><CompanySetup/></ProtectedRoute> 
-  },
 ])
 
 function App() {
