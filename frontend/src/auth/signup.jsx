@@ -40,6 +40,7 @@ function SignupForm() {
                 className="form-control"
                 id="fullName"
                 placeholder="Enter your full name"
+                autoComplete="off"
               />
             </div>
             <div className="form-group">
@@ -51,6 +52,7 @@ function SignupForm() {
                 className="form-control"
                 id="email"
                 placeholder="Enter your email"
+                autoComplete="off"
               />
             </div>
             <div className="form-group">
@@ -72,6 +74,7 @@ function SignupForm() {
                   className="form-control"
                   id="otp"
                   placeholder="Enter the OTP"
+                  autoComplete="off"
                 />
               </div>
             )}
@@ -84,6 +87,7 @@ function SignupForm() {
                 className="form-control"
                 id="phoneNumber"
                 placeholder="Enter your phone number"
+                autoComplete="off"
               />
             </div>
             <div className="form-group">
@@ -95,6 +99,7 @@ function SignupForm() {
                 className="form-control"
                 id="password"
                 placeholder="Enter your password"
+                autoComplete="off"
               />
             </div>
             <div className="form-group">
