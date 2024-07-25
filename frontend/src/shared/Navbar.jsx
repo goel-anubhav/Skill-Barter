@@ -1,16 +1,31 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Navbar, Nav, Button, Container } from "react-bootstrap";
+import { Navbar, Nav, Button, Container, Dropdown } from "react-bootstrap";
 import { FaBars } from "react-icons/fa";
 
 const CustomNavbar = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  useEffect(() => {
+    const loggedInUser = JSON.parse(localStorage.getItem("user"));
+    if (loggedInUser) {
+      setIsLoggedIn(true);
+      setUser(loggedInUser);
+    }
+  }, []);
+
+  const handleSignOut = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    setUser(null);
     navigate("/login");
+  };
+
+  const handleProfileClick = () => {
+    navigate("/update-profile");
   };
 
   return (
@@ -77,34 +92,35 @@ const CustomNavbar = () => {
             >
               Locations
             </Nav.Link>
-            {user ? (
+            {isLoggedIn ? (
               <>
-                <Nav.Link as={Link} to="/profile">
-                  <span className="font-weight-bold" style={{ color: "black" }}>
-                    {user.name}
-                  </span>
-                </Nav.Link>
-                <Nav.Link as={Link} to="/">
-                  <Button
-                    variant="outline-secondary"
-                    className="mr-2"
-                    style={{
-                      borderRadius: "4px",
-                      transition: "background-color 0.3s, color 0.3s",
-                    }}
-                    onClick={handleLogout}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = "#6A38C2";
-                      e.currentTarget.style.color = "white";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = "black";
-                    }}
+                <Dropdown alignRight>
+                  <Dropdown.Toggle
+                    as={Button}
+                    variant="link"
+                    id="dropdown-basic"
+                    className="p-0"
                   >
-                    Sign Out
-                  </Button>
-                </Nav.Link>
+                    <img
+                      src={user?.profilePicture || "default-profile.png"}
+                      alt="Profile"
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item onClick={handleProfileClick}>
+                      Edit Profile
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={handleSignOut}>
+                      Sign Out
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
               </>
             ) : (
               <>
