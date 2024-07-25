@@ -9,10 +9,11 @@ const CustomNavbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loggedInUser = JSON.parse(localStorage.getItem("user"));
-    if (loggedInUser) {
+    // Check if user data exists in localStorage to manage authentication status
+    const userData = localStorage.getItem("user");
+    if (userData) {
       setIsLoggedIn(true);
-      setUser(loggedInUser);
+      setUser(JSON.parse(userData));
     }
   }, []);
 
@@ -20,144 +21,65 @@ const CustomNavbar = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setIsLoggedIn(false);
-    setUser(null);
     navigate("/login");
   };
 
-  const handleProfileClick = () => {
-    navigate("/update-profile");
-  };
-
   return (
-    <Navbar bg="white" expand="lg" className="shadow-sm px-3">
+    <Navbar bg="white" expand="lg" className="shadow-sm">
       <Container fluid>
-        <Navbar.Brand className="font-weight-bold ml-2">
-          <h1 style={{ fontSize: "24px", margin: 0 }}>
-            Skill<span style={{ color: "#F83002" }}>Barter</span>
-          </h1>
+        <Navbar.Brand as={Link} to="/" className="font-weight-bold">
+          Skill<span style={{ color: "#F83002" }}>Barter</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav">
           <FaBars />
         </Navbar.Toggle>
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ml-auto align-items-center">
-            <Nav.Link
-              as={Link}
-              to="/"
-              className="font-weight-bold"
-              style={{
-                color: "black",
-                transition: "color 0.3s",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.color = "#6A38C2";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.color = "black";
-              }}
-            >
+            <Nav.Link as={Link} to="/" className="font-weight-bold">
               Home
             </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/skills"
-              className="font-weight-bold"
-              style={{
-                color: "black",
-                transition: "color 0.3s",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.color = "#6A38C2";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.color = "black";
-              }}
-            >
+            <Nav.Link as={Link} to="/skills" className="font-weight-bold">
               Skills
             </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/locations"
-              className="font-weight-bold"
-              style={{
-                color: "black",
-                transition: "color 0.3s",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.color = "#6A38C2";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.color = "black";
-              }}
-            >
+            <Nav.Link as={Link} to="/locations" className="font-weight-bold">
               Locations
             </Nav.Link>
             {isLoggedIn ? (
-              <>
-                <Dropdown alignRight>
-                  <Dropdown.Toggle
-                    as={Button}
-                    variant="link"
-                    id="dropdown-basic"
-                    className="p-0"
-                  >
-                    <img
-                      src={user?.profilePicture || "default-profile.png"}
-                      alt="Profile"
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item onClick={handleProfileClick}>
-                      Edit Profile
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={handleSignOut}>
-                      Sign Out
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </>
+              <Dropdown align="end">
+                <Dropdown.Toggle as={Nav.Link} className="p-0">
+                  <img
+                    src="https://via.placeholder.com/40"
+                    alt="Profile"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                    }}
+                  />
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => navigate("/update-profile")}>
+                    Edit Profile
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={handleSignOut}>
+                    Sign Out
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             ) : (
               <>
-                <Nav.Link as={Link} to="/login">
+                <Nav.Link as={Link} to="/login" className="p-0">
                   <Button
                     variant="outline-secondary"
                     className="mr-2"
-                    style={{
-                      borderRadius: "4px",
-                      transition: "background-color 0.3s, color 0.3s",
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = "#6A38C2";
-                      e.currentTarget.style.color = "white";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = "black";
-                    }}
+                    style={{ marginRight: "10px" }}
                   >
                     Login
                   </Button>
                 </Nav.Link>
-                <Nav.Link as={Link} to="/signup">
+                <Nav.Link as={Link} to="/signup" className="p-0">
                   <Button
-                    style={{
-                      backgroundColor: "#6A38C2",
-                      color: "white",
-                      borderRadius: "4px",
-                      transition: "background-color 0.3s",
-                    }}
-                    onMouseOver={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#5f32ad")
-                    }
-                    onMouseOut={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#6A38C2")
-                    }
+                    style={{ backgroundColor: "#6A38C2", color: "white" }}
                   >
                     Signup
                   </Button>
