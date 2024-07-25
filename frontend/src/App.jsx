@@ -10,6 +10,7 @@ import Login from "./auth/login";
 import SignupForm from "./auth/signup";
 import Registration from "./auth/registration";
 import ConfirmationPage from "./components/confirmationPage";
+import Example from "./components/dashboard";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               path="/Confirm-registration"
               element={<ConfirmationPage />}
             />
+            <Route path="/dashboard" element={<Example />} />
           </Routes>
         </div>
         <Footer />

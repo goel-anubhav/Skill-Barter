@@ -1,9 +1,18 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar, Nav, Button, Container } from "react-bootstrap";
 import { FaBars } from "react-icons/fa";
 
 const CustomNavbar = () => {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
     <Navbar bg="white" expand="lg" className="shadow-sm px-3">
       <Container fluid>
@@ -68,44 +77,77 @@ const CustomNavbar = () => {
             >
               Locations
             </Nav.Link>
-            <Nav.Link as={Link} to="/Login">
-              <Button
-                variant="outline-secondary"
-                className="mr-2"
-                style={{
-                  borderRadius: "4px",
-                  transition: "background-color 0.3s, color 0.3s",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = "#6A38C2";
-                  e.currentTarget.style.color = "white";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "black";
-                }}
-              >
-                Login
-              </Button>
-            </Nav.Link>
-            <Nav.Link as={Link} to="/signup">
-              <Button
-                style={{
-                  backgroundColor: "#6A38C2",
-                  color: "white",
-                  borderRadius: "4px",
-                  transition: "background-color 0.3s",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#5f32ad")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#6A38C2")
-                }
-              >
-                Signup
-              </Button>
-            </Nav.Link>
+            {user ? (
+              <>
+                <Nav.Link as={Link} to="/profile">
+                  <span className="font-weight-bold" style={{ color: "black" }}>
+                    {user.name}
+                  </span>
+                </Nav.Link>
+                <Nav.Link as={Link} to="/">
+                  <Button
+                    variant="outline-secondary"
+                    className="mr-2"
+                    style={{
+                      borderRadius: "4px",
+                      transition: "background-color 0.3s, color 0.3s",
+                    }}
+                    onClick={handleLogout}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = "#6A38C2";
+                      e.currentTarget.style.color = "white";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "black";
+                    }}
+                  >
+                    Sign Out
+                  </Button>
+                </Nav.Link>
+              </>
+            ) : (
+              <>
+                <Nav.Link as={Link} to="/login">
+                  <Button
+                    variant="outline-secondary"
+                    className="mr-2"
+                    style={{
+                      borderRadius: "4px",
+                      transition: "background-color 0.3s, color 0.3s",
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = "#6A38C2";
+                      e.currentTarget.style.color = "white";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "black";
+                    }}
+                  >
+                    Login
+                  </Button>
+                </Nav.Link>
+                <Nav.Link as={Link} to="/signup">
+                  <Button
+                    style={{
+                      backgroundColor: "#6A38C2",
+                      color: "white",
+                      borderRadius: "4px",
+                      transition: "background-color 0.3s",
+                    }}
+                    onMouseOver={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#5f32ad")
+                    }
+                    onMouseOut={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#6A38C2")
+                    }
+                  >
+                    Signup
+                  </Button>
+                </Nav.Link>
+              </>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

@@ -5,16 +5,17 @@ import { statesOfIndia } from "./states";
 import { qualifications } from "./qualifications";
 import CustomNavbar from "../shared/Navbar";
 import { skillsOptions } from "./skills";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const years = Array.from({ length: 31 }, (_, i) => ({
   value: i,
   label: `${i} years`,
 }));
-const months = Array.from({ length: 12 }, (_, i) => ({
-  value: i,
-  label: `${i} months`,
-}));
+// const months = Array.from({ length: 12 }, (_, i) => ({
+//   value: i,
+//   label: `${i} months`,
+// }));
 
 function Registration({ email }) {
   const [formData, setFormData] = useState({
@@ -25,12 +26,13 @@ function Registration({ email }) {
     state: null,
     skills: [],
     desiredSkills: [],
-    yearsOfExperience: null,
-    monthsOfExperience: null,
+    year_of_experience: null,
+    // month_of_experience: null,
     qualification: null,
   });
   const [selectedFile1, setSelectedFile1] = useState(null);
   const [selectedFile2, setSelectedFile2] = useState(null);
+  const [message, setMessage] = useState("");
 
   const handleChange = (name, value) => {
     setFormData((prevState) => ({
@@ -42,21 +44,70 @@ function Registration({ email }) {
   const handleFileChange1 = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setSelectedFile1(file.name);
+      setSelectedFile1(file);
     }
   };
 
   const handleFileChange2 = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setSelectedFile2(file.name);
+      setSelectedFile2(file);
     }
   };
 
   const navigate = useNavigate();
-  const handleSubmit = (event) => {
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    navigate("/confirm-registration");
+    const data = new FormData();
+    data.append("full_name", formData.fullName);
+    data.append("email", formData.email);
+    data.append("phone_number", formData.phoneNumber);
+    data.append("city", formData.city);
+    data.append("state", formData.state ? formData.state.value : "");
+    data.append(
+      "year_of_experience",
+      formData.year_of_experience ? formData.year_of_experience.value : 0
+    );
+    // data.append(
+    //   "month_of_experience",
+    //   formData.month_of_experience ? formData.month_of_experience.value : 0
+    // );
+    data.append(
+      "qualification",
+      formData.qualification ? formData.qualification.value : ""
+    );
+    data.append(
+      "skills",
+      formData.skills.map((skill) => skill.value).join(", ")
+    );
+    data.append(
+      "desired_skills",
+      formData.desiredSkills.map((skill) => skill.value).join(", ")
+    );
+    if (selectedFile1) {
+      data.append("certification_1", selectedFile1);
+    }
+    if (selectedFile2) {
+      data.append("certification_2", selectedFile2);
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/users/",
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setMessage("Registration successful!");
+      navigate("/confirm-registration");
+    } catch (error) {
+      setMessage("Error during registration");
+      console.error(error.response ? error.response.data : error.message);
+    }
   };
 
   return (
@@ -82,6 +133,7 @@ function Registration({ email }) {
                       onChange={(e) => handleChange("fullName", e.target.value)}
                       placeholder="Full Name"
                       autoComplete="off"
+                      required
                     />
                   </div>
                   <div className="col-md-6">
@@ -97,6 +149,7 @@ function Registration({ email }) {
                       onChange={(e) => handleChange("email", e.target.value)}
                       placeholder="Email"
                       autoComplete="off"
+                      required
                     />
                   </div>
                 </div>
@@ -116,6 +169,7 @@ function Registration({ email }) {
                       }
                       placeholder="Phone Number"
                       autoComplete="off"
+                      required
                     />
                   </div>
                   <div className="col-md-6">
@@ -131,6 +185,7 @@ function Registration({ email }) {
                       onChange={(e) => handleChange("city", e.target.value)}
                       placeholder="City"
                       autoComplete="off"
+                      required
                     />
                   </div>
                 </div>
@@ -151,6 +206,7 @@ function Registration({ email }) {
                         handleChange("state", selectedOption)
                       }
                       placeholder="Select your state"
+                      required
                     />
                   </div>
                   <div className="col-md-6">
@@ -170,6 +226,7 @@ function Registration({ email }) {
                       }
                       placeholder="Select your qualification"
                       isSearchable
+                      required
                     />
                   </div>
                 </div>
@@ -178,26 +235,28 @@ function Registration({ email }) {
                     <label className="form-label">Years of Experience</label>
                     <div className="d-flex">
                       <Select
-                        id="yearsOfExperience"
-                        name="yearsOfExperience"
+                        id="year_of_experience"
+                        name="year_of_experience"
                         options={years}
-                        value={formData.yearsOfExperience}
+                        value={formData.year_of_experience}
                         onChange={(selectedOption) =>
-                          handleChange("yearsOfExperience", selectedOption)
+                          handleChange("year_of_experience", selectedOption)
                         }
                         placeholder="Years"
                         className="mr-2"
+                        required
                       />
-                      <Select
-                        id="monthsOfExperience"
-                        name="monthsOfExperience"
+                      {/* <Select
+                        id="month_of_experience"
+                        name="month_of_experience"
                         options={months}
-                        value={formData.monthsOfExperience}
+                        value={formData.month_of_experience}
                         onChange={(selectedOption) =>
-                          handleChange("monthsOfExperience", selectedOption)
+                          handleChange("month_of_experience", selectedOption)
                         }
                         placeholder="Months"
-                      />
+                        required
+                      /> */}
                     </div>
                   </div>
                   <div className="col-md-6">
@@ -218,6 +277,7 @@ function Registration({ email }) {
                         handleChange("skills", selectedOptions)
                       }
                       placeholder="Select or type your skills"
+                      required
                     />
                   </div>
                 </div>
@@ -244,7 +304,7 @@ function Registration({ email }) {
                       </label>
                       {selectedFile1 && (
                         <div className="mt-2 text-center">
-                          <p>{selectedFile1}</p>
+                          <p>{selectedFile1.name}</p>
                         </div>
                       )}
                     </div>
@@ -271,7 +331,7 @@ function Registration({ email }) {
                       </label>
                       {selectedFile2 && (
                         <div className="mt-2 text-center">
-                          <p>{selectedFile2}</p>
+                          <p>{selectedFile2.name}</p>
                         </div>
                       )}
                     </div>
@@ -296,12 +356,14 @@ function Registration({ email }) {
                         handleChange("desiredSkills", selectedOptions)
                       }
                       placeholder="Select or type your desired skills"
+                      required
                     />
                   </div>
                 </div>
                 <button type="submit" className="btn btn-primary w-100">
                   Submit
                 </button>
+                {message && <p className="mt-3 text-center">{message}</p>}
               </form>
             </div>
           </div>
