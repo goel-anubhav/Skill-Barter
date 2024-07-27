@@ -11,8 +11,10 @@ function SignupForm() {
     email: "",
     phoneNumber: "",
     password: "",
+    otp: "",
   });
   const [message, setMessage] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const navigate = useNavigate();
 
   const handleImageChange = (event) => {
@@ -27,6 +29,19 @@ function SignupForm() {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  const handleSendOtp = async () => {
+    try {
+      await axios.post("http://localhost:8000/api/users/send-otp/", {
+        phone_number: formData.phoneNumber,
+      });
+      setOtpSent(true);
+      setMessage("OTP sent successfully!");
+    } catch (error) {
+      setMessage("Error sending OTP");
+      console.error(error.response ? error.response.data : error.message);
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData();
@@ -34,6 +49,7 @@ function SignupForm() {
     data.append("email", formData.email);
     data.append("phone_number", formData.phoneNumber);
     data.append("password", formData.password);
+    data.append("otp", formData.otp);
     if (selectedImage) {
       data.append("profile_picture", selectedImage);
     }
@@ -96,8 +112,35 @@ function SignupForm() {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                disabled={otpSent}
               />
+              <button
+                type="button"
+                className="btn btn-secondary mt-2"
+                onClick={handleSendOtp}
+                disabled={otpSent}
+              >
+                Send OTP
+              </button>
             </div>
+            {otpSent && (
+              <div className="form-group">
+                <label htmlFor="otp" className="font-weight-bold">
+                  OTP
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="otp"
+                  name="otp"
+                  placeholder="Enter the OTP"
+                  autoComplete="off"
+                  value={formData.otp}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            )}
             <div className="form-group">
               <label htmlFor="phoneNumber" className="font-weight-bold">
                 Phone Number
