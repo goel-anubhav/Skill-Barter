@@ -12,6 +12,7 @@ import Registration from "./auth/registration";
 import ConfirmationPage from "./components/confirmationPage";
 import Example from "./components/dashboard";
 import Updateprofile from "./components/updateprofile";
+import PublicProfileView from "./components/publicProfileView";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             />
             <Route path="/dashboard" element={<Example />} />
             <Route path="/update-profile" element={<Updateprofile />} />
+            <Route path="/profile-view" element={<PublicProfileView/>}/>
           </Routes>
         </div>
         <Footer />
