@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import CustomNavbar from "../shared/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "../auth/states";
 import { skillsOptions } from "../auth/skills";
-import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [showSkills, setShowSkills] = useState(false);
@@ -15,7 +15,7 @@ const Dashboard = () => {
   const skillsRef = useRef(null);
   const locationsRef = useRef(null);
   const forumRef = useRef(null);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const toggleSkills = () => {
     setShowSkills(!showSkills);
@@ -71,17 +71,21 @@ const Dashboard = () => {
     }
   };
 
-  const searchBySkill = () => {
+  const handleSearchBySkill = () => {
     navigate("/profile-view", {
       state: { searchType: "skill", searchTerm: selectedSkill },
     });
   };
 
-  const searchByLocation = () => {
+  const handleSearchByLocation = () => {
     navigate("/profile-view", {
       state: { searchType: "location", searchTerm: selectedLocation },
     });
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <>
@@ -202,7 +206,7 @@ const Dashboard = () => {
               <button
                 type="button"
                 className="btn btn-primary mt-2"
-                onClick={searchBySkill}
+                onClick={handleSearchBySkill}
               >
                 Search
               </button>
@@ -235,7 +239,7 @@ const Dashboard = () => {
               <button
                 type="button"
                 className="btn btn-primary mt-2"
-                onClick={searchByLocation}
+                onClick={handleSearchByLocation}
               >
                 Search
               </button>

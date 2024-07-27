@@ -58,7 +58,24 @@ const PublicProfileView = () => {
           ))}
         </Row>
         <div className="text-center mt-4">
-          <Button variant="primary" onClick={handleSearchAgain}>
+          <Button
+            variant="primary"
+            onClick={handleSearchAgain}
+            style={{
+              width: "200px",
+              padding: "10px 20px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              borderRadius: "25px",
+              transition: "background-color 0.3s ease",
+            }}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.backgroundColor = "#5f32ad")
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.backgroundColor = "#6A38C2")
+            }
+          >
             Search Again
           </Button>
         </div>
