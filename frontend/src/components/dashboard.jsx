@@ -3,6 +3,7 @@ import CustomNavbar from "../shared/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "../auth/states";
 import { skillsOptions } from "../auth/skills";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [showSkills, setShowSkills] = useState(false);
@@ -14,6 +15,7 @@ const Dashboard = () => {
   const skillsRef = useRef(null);
   const locationsRef = useRef(null);
   const forumRef = useRef(null);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const toggleSkills = () => {
     setShowSkills(!showSkills);
@@ -67,6 +69,18 @@ const Dashboard = () => {
       e.target.reset();
       setSelectedDesiredSkills([]);
     }
+  };
+
+  const searchBySkill = () => {
+    navigate("/profile-view", {
+      state: { searchType: "skill", searchTerm: selectedSkill },
+    });
+  };
+
+  const searchByLocation = () => {
+    navigate("/profile-view", {
+      state: { searchType: "location", searchTerm: selectedLocation },
+    });
   };
 
   return (
@@ -185,7 +199,11 @@ const Dashboard = () => {
                   ))}
                 </select>
               </div>
-              <button type="submit" className="btn btn-primary mt-2">
+              <button
+                type="button"
+                className="btn btn-primary mt-2"
+                onClick={searchBySkill}
+              >
                 Search
               </button>
             </form>
@@ -214,7 +232,11 @@ const Dashboard = () => {
                   ))}
                 </select>
               </div>
-              <button type="submit" className="btn btn-primary mt-2">
+              <button
+                type="button"
+                className="btn btn-primary mt-2"
+                onClick={searchByLocation}
+              >
                 Search
               </button>
             </form>
