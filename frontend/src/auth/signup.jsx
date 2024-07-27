@@ -1,32 +1,59 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
 
 function SignupForm() {
-  const [otpSent, setOtpSent] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+  });
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
-
-  const handleSendOtp = () => {
-    setOtpSent(true);
-  };
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setSelectedImage(file);
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Add your form submission logic here
-    navigate("/registration"); // Redirect to the registration page
+    const data = new FormData();
+    data.append("full_name", formData.fullName);
+    data.append("email", formData.email);
+    data.append("phone_number", formData.phoneNumber);
+    data.append("password", formData.password);
+    if (selectedImage) {
+      data.append("profile_picture", selectedImage);
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/users/signup/",
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setMessage("Signup successful!");
+      navigate("/registration");
+    } catch (error) {
+      setMessage("Error during signup");
+      console.error(error.response ? error.response.data : error.message);
+    }
   };
 
   return (
@@ -50,6 +77,9 @@ function SignupForm() {
                 name="fullName"
                 placeholder="Enter your full name"
                 autoComplete="off"
+                value={formData.fullName}
+                onChange={handleChange}
+                required
               />
             </div>
             <div className="form-group">
@@ -63,32 +93,11 @@ function SignupForm() {
                 name="email"
                 placeholder="Enter your email"
                 autoComplete="off"
+                value={formData.email}
+                onChange={handleChange}
+                required
               />
             </div>
-            <div className="form-group">
-              <button
-                className="btn btn-primary btn-block"
-                type="button"
-                onClick={handleSendOtp}
-              >
-                Send OTP
-              </button>
-            </div>
-            {otpSent && (
-              <div className="form-group">
-                <label htmlFor="otp" className="font-weight-bold">
-                  OTP
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="otp"
-                  name="otp"
-                  placeholder="Enter the OTP"
-                  autoComplete="off"
-                />
-              </div>
-            )}
             <div className="form-group">
               <label htmlFor="phoneNumber" className="font-weight-bold">
                 Phone Number
@@ -100,6 +109,9 @@ function SignupForm() {
                 name="phoneNumber"
                 placeholder="Enter your phone number"
                 autoComplete="off"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                required
               />
             </div>
             <div className="form-group">
@@ -113,6 +125,9 @@ function SignupForm() {
                 name="password"
                 placeholder="Enter your password"
                 autoComplete="off"
+                value={formData.password}
+                onChange={handleChange}
+                required
               />
             </div>
             <div className="form-group">
@@ -139,7 +154,7 @@ function SignupForm() {
               {selectedImage && (
                 <div className="mt-2 text-center">
                   <img
-                    src={selectedImage}
+                    src={URL.createObjectURL(selectedImage)}
                     alt="Selected"
                     style={{
                       maxWidth: "100%",
@@ -154,6 +169,7 @@ function SignupForm() {
             <button type="submit" className="btn btn-primary btn-block">
               Sign Up
             </button>
+            {message && <p className="mt-3 text-center">{message}</p>}
             <p className="mt-3 text-center">
               Already have an account? <a href="/login">Login</a>
             </p>

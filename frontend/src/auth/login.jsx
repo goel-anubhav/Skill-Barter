@@ -1,8 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
 
 function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/users/login/",
+        {
+          email: email,
+          password: password,
+        }
+      );
+
+      if (response.data.token) {
+        // Save token and user info in localStorage or any state management library like Redux
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        setMessage("Login successful!");
+        navigate("/dashboard"); // Redirect to a dashboard or homepage after login
+      }
+    } catch (error) {
+      setMessage("Error during login");
+      console.error(error.response ? error.response.data : error.message);
+    }
+  };
+
   return (
     <>
       <CustomNavbar className="fixed-top" />
@@ -19,7 +50,7 @@ function Login() {
       >
         <div className="card p-4" style={{ maxWidth: "600px", width: "100%" }}>
           <h2 className="mb-4">Login</h2>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="form-group mb-3">
               <label htmlFor="email" className="form-label">
                 Email
@@ -30,6 +61,8 @@ function Login() {
                 id="email"
                 placeholder="Enter a valid Email Address"
                 autoComplete="off"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -43,12 +76,15 @@ function Login() {
                 id="password"
                 placeholder="Enter a Strong Password"
                 autoComplete="off"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
             <button type="submit" className="btn btn-primary btn-block w-100">
               Login
             </button>
+            {message && <p className="mt-3 text-center">{message}</p>}
             <div className="mt-3 text-center">
               <span>Don't have an account? </span>
               <a href="/signup" className="text-primary">

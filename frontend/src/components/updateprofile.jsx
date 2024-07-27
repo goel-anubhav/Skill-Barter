@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { statesOfIndia } from "./states";
-import { qualifications } from "./qualifications";
+import { statesOfIndia } from "../auth/states";
+import { qualifications } from "../auth/qualifications";
 import CustomNavbar from "../shared/Navbar";
-import { skillsOptions } from "./skills";
+import { skillsOptions } from "../auth/skills";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -12,27 +12,66 @@ const years = Array.from({ length: 31 }, (_, i) => ({
   value: i,
   label: `${i} years`,
 }));
-// const months = Array.from({ length: 12 }, (_, i) => ({
-//   value: i,
-//   label: `${i} months`,
-// }));
 
-function Registration({ email }) {
+const UpdateProfile = () => {
   const [formData, setFormData] = useState({
     fullName: "",
-    email: email || "",
+    email: "",
     phoneNumber: "",
     city: "",
     state: null,
     skills: [],
     desiredSkills: [],
     year_of_experience: null,
-    // month_of_experience: null,
     qualification: null,
   });
   const [selectedFile1, setSelectedFile1] = useState(null);
   const [selectedFile2, setSelectedFile2] = useState(null);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch user data from the server or local storage
+    const fetchData = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem("user"));
+        if (userData) {
+          setFormData({
+            fullName: userData.full_name || "",
+            email: userData.email || "",
+            phoneNumber: userData.phone_number || "",
+            city: userData.city || "",
+            state: userData.state
+              ? { value: userData.state, label: userData.state }
+              : null,
+            skills: userData.skills
+              ? userData.skills
+                  .split(", ")
+                  .map((skill) => ({ value: skill, label: skill }))
+              : [],
+            desiredSkills: userData.desired_skills
+              ? userData.desired_skills
+                  .split(", ")
+                  .map((skill) => ({ value: skill, label: skill }))
+              : [],
+            year_of_experience: userData.year_of_experience
+              ? {
+                  value: userData.year_of_experience,
+                  label: `${userData.year_of_experience} years`,
+                }
+              : null,
+            qualification: userData.qualification
+              ? { value: userData.qualification, label: userData.qualification }
+              : null,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleChange = (name, value) => {
     setFormData((prevState) => ({
@@ -55,8 +94,6 @@ function Registration({ email }) {
     }
   };
 
-  const navigate = useNavigate();
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData();
@@ -69,10 +106,6 @@ function Registration({ email }) {
       "year_of_experience",
       formData.year_of_experience ? formData.year_of_experience.value : 0
     );
-    // data.append(
-    //   "month_of_experience",
-    //   formData.month_of_experience ? formData.month_of_experience.value : 0
-    // );
     data.append(
       "qualification",
       formData.qualification ? formData.qualification.value : ""
@@ -93,8 +126,8 @@ function Registration({ email }) {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/users/",
+      const response = await axios.put(
+        "http://localhost:8000/api/users/update-profile/",
         data,
         {
           headers: {
@@ -102,10 +135,10 @@ function Registration({ email }) {
           },
         }
       );
-      setMessage("Registration successful!");
-      navigate("/confirm-registration");
+      setMessage("Profile updated successfully!");
+      navigate("/dashboard");
     } catch (error) {
-      setMessage("Error during registration");
+      setMessage("Error updating profile");
       console.error(error.response ? error.response.data : error.message);
     }
   };
@@ -117,7 +150,7 @@ function Registration({ email }) {
         <div className="row justify-content-center">
           <div className="col-lg-8">
             <div className="card shadow-lg p-4 mb-5 bg-white rounded">
-              <h3 className="text-center mb-4">Registration Form</h3>
+              <h3 className="text-center mb-4">Update Profile</h3>
               <form onSubmit={handleSubmit}>
                 <div className="row mb-3">
                   <div className="col-md-6 mb-3 mb-md-0">
@@ -246,17 +279,6 @@ function Registration({ email }) {
                         className="mr-2"
                         required
                       />
-                      {/* <Select
-                        id="month_of_experience"
-                        name="month_of_experience"
-                        options={months}
-                        value={formData.month_of_experience}
-                        onChange={(selectedOption) =>
-                          handleChange("month_of_experience", selectedOption)
-                        }
-                        placeholder="Months"
-                        required
-                      /> */}
                     </div>
                   </div>
                   <div className="col-md-6">
@@ -361,7 +383,7 @@ function Registration({ email }) {
                   </div>
                 </div>
                 <button type="submit" className="btn btn-primary w-100">
-                  Submit
+                  Update Profile
                 </button>
                 {message && <p className="mt-3 text-center">{message}</p>}
               </form>
@@ -371,6 +393,6 @@ function Registration({ email }) {
       </div>
     </>
   );
-}
+};
 
-export default Registration;
+export default UpdateProfile;

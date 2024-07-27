@@ -15,6 +15,7 @@ class User(models.Model):
     certification2 = models.CharField(max_length=255, blank=True, null=True)
     desired_skills = models.TextField()
     is_approved = models.BooleanField(default=False)
+    profile_picture = models.ImageField(upload_to='received_profile_pictures/', null=True, blank=True)
 
     def __str__(self):
         return self.full_name
