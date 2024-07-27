@@ -13,7 +13,9 @@ import ConfirmationPage from "./components/confirmationPage";
 import Example from "./components/dashboard";
 import Updateprofile from "./components/updateprofile";
 import FullProfileView from "./components/fullProfileView";
-import PublicProfileView from "./components/publicProfileView"
+import PublicProfileView from "./components/publicProfileView";
+import ProtectedRoute from "./auth/protectedRoute";
+import NotFound from "./components/notFound"; 
 
 function App() {
   return (
@@ -31,10 +33,24 @@ function App() {
               path="/confirm-registration"
               element={<ConfirmationPage />}
             />
-            <Route path="/dashboard" element={<Example />} />
-            <Route path="/update-profile" element={<Updateprofile />} />
-            <Route path="/profile-view" element={<PublicProfileView />} />
-            <Route path="/full-profile-view" element={<FullProfileView />} />
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoute element={<Example />} />}
+            />
+            <Route
+              path="/update-profile"
+              element={<ProtectedRoute element={<Updateprofile />} />}
+            />
+            <Route
+              path="/profile-view"
+              element={<ProtectedRoute element={<PublicProfileView />} />}
+            />
+            <Route
+              path="/full-profile-view"
+              element={<ProtectedRoute element={<FullProfileView />} />}
+            />
+            <Route path="*" element={<NotFound />} />{" "}
+            {/* Add this route as the last one */}
           </Routes>
         </div>
         <Footer />

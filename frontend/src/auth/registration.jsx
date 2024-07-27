@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "./states";
@@ -12,10 +12,6 @@ const years = Array.from({ length: 31 }, (_, i) => ({
   value: i,
   label: `${i} years`,
 }));
-// const months = Array.from({ length: 12 }, (_, i) => ({
-//   value: i,
-//   label: `${i} months`,
-// }));
 
 function Registration({ email }) {
   const [formData, setFormData] = useState({
@@ -27,12 +23,23 @@ function Registration({ email }) {
     skills: [],
     desiredSkills: [],
     year_of_experience: null,
-    // month_of_experience: null,
     qualification: null,
   });
   const [selectedFile1, setSelectedFile1] = useState(null);
   const [selectedFile2, setSelectedFile2] = useState(null);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setFormData((prevState) => ({
+        ...prevState,
+        fullName: user.full_name,
+        email: user.email,
+        phoneNumber: user.phone_number,
+      }));
+    }
+  }, []);
 
   const handleChange = (name, value) => {
     setFormData((prevState) => ({
@@ -59,6 +66,21 @@ function Registration({ email }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.phoneNumber ||
+      !formData.city ||
+      !formData.state ||
+      !formData.skills.length ||
+      !formData.desiredSkills.length ||
+      !formData.year_of_experience ||
+      !formData.qualification
+    ) {
+      setMessage("Please fill all the fields");
+      return;
+    }
+
     const data = new FormData();
     data.append("full_name", formData.fullName);
     data.append("email", formData.email);
@@ -69,10 +91,6 @@ function Registration({ email }) {
       "year_of_experience",
       formData.year_of_experience ? formData.year_of_experience.value : 0
     );
-    // data.append(
-    //   "month_of_experience",
-    //   formData.month_of_experience ? formData.month_of_experience.value : 0
-    // );
     data.append(
       "qualification",
       formData.qualification ? formData.qualification.value : ""
@@ -113,7 +131,7 @@ function Registration({ email }) {
   return (
     <>
       <CustomNavbar />
-      <div className="container mt-5">
+      <div className="container mt-5 mb-5">
         <div className="row justify-content-center">
           <div className="col-lg-8">
             <div className="card shadow-lg p-4 mb-5 bg-white rounded">
@@ -134,6 +152,7 @@ function Registration({ email }) {
                       placeholder="Full Name"
                       autoComplete="off"
                       required
+                      disabled={!!formData.fullName}
                     />
                   </div>
                   <div className="col-md-6">
@@ -150,6 +169,7 @@ function Registration({ email }) {
                       placeholder="Email"
                       autoComplete="off"
                       required
+                      disabled={!!formData.email}
                     />
                   </div>
                 </div>
@@ -170,6 +190,7 @@ function Registration({ email }) {
                       placeholder="Phone Number"
                       autoComplete="off"
                       required
+                      disabled={!!formData.phoneNumber}
                     />
                   </div>
                   <div className="col-md-6">
@@ -230,7 +251,7 @@ function Registration({ email }) {
                     />
                   </div>
                 </div>
-                <div className="row mb-3">
+                <div className="row mb-1">
                   <div className="col-md-6 mb-3 mb-md-0">
                     <label className="form-label">Years of Experience</label>
                     <div className="d-flex">
@@ -246,17 +267,6 @@ function Registration({ email }) {
                         className="mr-2"
                         required
                       />
-                      {/* <Select
-                        id="month_of_experience"
-                        name="month_of_experience"
-                        options={months}
-                        value={formData.month_of_experience}
-                        onChange={(selectedOption) =>
-                          handleChange("month_of_experience", selectedOption)
-                        }
-                        placeholder="Months"
-                        required
-                      /> */}
                     </div>
                   </div>
                   <div className="col-md-6">

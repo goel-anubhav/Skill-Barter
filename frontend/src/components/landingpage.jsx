@@ -4,7 +4,9 @@ import CustomNavbar from "../shared/Navbar";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { skillsOptions } from "../auth/skills"; // Import skillsOptions
+import { skillsOptions } from "../auth/skills";
+import ForumCards from "./forumCards";
+import { forumPosts } from "./forumsSampleData"; // Import sample data
 
 function LandingPage() {
   const [currentSkill, setCurrentSkill] = useState(0);
@@ -178,9 +180,9 @@ function LandingPage() {
             <ArrowForwardIcon />
           </button>
         </div>
-        <h3 style={{ color: "#6f42c1", fontWeight: "bold" }}>
-          Latest and Top Job Openings
-        </h3>
+
+ 
+        <ForumCards forumPosts={forumPosts} />
       </div>
     </>
   );
