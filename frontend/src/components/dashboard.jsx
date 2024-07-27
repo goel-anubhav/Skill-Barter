@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomNavbar from "../shared/Navbar";
+import ForumCards from "./forumCards";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "../auth/states";
 import { skillsOptions } from "../auth/skills";
+import { forumPosts } from "./forumsSampleData";
 
 const Dashboard = () => {
   const [showSkills, setShowSkills] = useState(false);
@@ -11,7 +13,7 @@ const Dashboard = () => {
   const [selectedSkill, setSelectedSkill] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedDesiredSkills, setSelectedDesiredSkills] = useState([]);
-  const [forumPosts, setForumPosts] = useState([]);
+  const [forumPostsList, setForumPostsList] = useState(forumPosts);
   const skillsRef = useRef(null);
   const locationsRef = useRef(null);
   const forumRef = useRef(null);
@@ -62,9 +64,18 @@ const Dashboard = () => {
     const message = e.target.forumMessage.value;
 
     if (topic && message) {
-      setForumPosts([
-        ...forumPosts,
-        { topic, message, desiredSkills: selectedDesiredSkills },
+      setForumPostsList([
+        ...forumPostsList,
+        {
+          id: forumPostsList.length + 1,
+          name: topic,
+          location: "Unknown",
+          skills: ["Skill1", "Skill2"],
+          desiredSkills: selectedDesiredSkills,
+          rating: "4.5",
+          img: "https://via.placeholder.com/150",
+          message,
+        },
       ]);
       e.target.reset();
       setSelectedDesiredSkills([]);
@@ -248,6 +259,8 @@ const Dashboard = () => {
         )}
       </div>
 
+      <ForumCards forumPosts={forumPostsList} />
+
       <div className="container mt-5" ref={forumRef}>
         <h2>Forum</h2>
         <p>Discuss and share your bartering experiences with others.</p>
@@ -292,13 +305,13 @@ const Dashboard = () => {
         </form>
         <div className="mt-5">
           <h3>All Forum Posts</h3>
-          {forumPosts.length === 0 ? (
+          {forumPostsList.length === 0 ? (
             <p>No posts yet. Be the first to post!</p>
           ) : (
             <ul className="list-group">
-              {forumPosts.map((post, index) => (
+              {forumPostsList.map((post, index) => (
                 <li key={index} className="list-group-item">
-                  <h5>{post.topic}</h5>
+                  <h5>{post.name}</h5>
                   <p>{post.message}</p>
                   <p>
                     <strong>Desired Skills:</strong>{" "}
