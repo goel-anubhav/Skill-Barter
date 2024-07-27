@@ -15,6 +15,8 @@ function SignupForm() {
   });
   const [message, setMessage] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const navigate = useNavigate();
 
   const handleImageChange = (event) => {
@@ -27,6 +29,14 @@ function SignupForm() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+    if (name === "phoneNumber") {
+      if (/^\d{10}$/.test(value)) {
+        setPhoneError("");
+      } else {
+        setPhoneError("Phone number must be exactly 10 digits.");
+      }
+    }
   };
 
   const handleSendOtp = async () => {
@@ -44,6 +54,37 @@ function SignupForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Basic validation
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.phoneNumber ||
+      !formData.password ||
+      !formData.otp
+    ) {
+      setMessage("Please fill all the fields");
+      return;
+    }
+
+    // Password validation
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setPasswordError(
+        "Password must contain at least one capital letter, one number, one special character, and be at least 8 characters long"
+      );
+      return;
+    }
+
+    if (phoneError) {
+      setMessage(phoneError);
+      return;
+    }
+
+    setPasswordError("");
+    setMessage("");
+
     const data = new FormData();
     data.append("full_name", formData.fullName);
     data.append("email", formData.email);
@@ -77,7 +118,7 @@ function SignupForm() {
       <CustomNavbar className="fixed-top" />
       <div
         className="container d-flex justify-content-center align-items-start vh-100 pt-2"
-        style={{ marginTop: "70px" }}
+        style={{ marginTop: "70px", marginBottom: "70px" }}
       >
         <div className="card p-4 w-100" style={{ maxWidth: "600px" }}>
           <h3 className="text-center mb-4">Sign Up</h3>
@@ -156,6 +197,9 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
+              {phoneError && (
+                <small className="text-danger">{phoneError}</small>
+              )}
             </div>
             <div className="form-group">
               <label htmlFor="password" className="font-weight-bold">
@@ -172,6 +216,13 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
+              {passwordError && (
+                <small className="text-danger">{passwordError}</small>
+              )}
+              <small className="form-text text-muted">
+                Password must contain at least one capital letter, one number,
+                one special character, and be at least 8 characters long.
+              </small>
             </div>
             <div className="form-group">
               <label htmlFor="profilePicture" className="font-weight-bold">
