@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Modal, Button } from "react-bootstrap";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
 
@@ -8,6 +9,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
@@ -29,9 +31,14 @@ function Login() {
         navigate("/dashboard"); // Redirect to a dashboard or homepage after login
       }
     } catch (error) {
-      setMessage("Error during login");
+      setMessage("Error during login. Please Check Your E-Mail or Password and Try Again");
+      setShowModal(true);
       console.error(error.response ? error.response.data : error.message);
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
 
   return (
@@ -94,6 +101,18 @@ function Login() {
           </form>
         </div>
       </div>
+
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Error During Login</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{message}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

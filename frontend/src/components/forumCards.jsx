@@ -2,8 +2,23 @@ import React from "react";
 import { Card, Button, Carousel } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-const ForumCards = ({ forumPosts }) => {
+const ForumCards = ({ forumPosts = [] }) => {
   const navigate = useNavigate();
+
+  const isAuthenticated = () => {
+    // Replace this with your actual logic for checking if a user is authenticated
+    return localStorage.getItem("authToken") !== null;
+  };
+
+  const handleViewProfile = (post) => {
+    if (isAuthenticated()) {
+      navigate("/full-profile-view", {
+        state: { profile: post },
+      });
+    } else {
+      navigate("/login");
+    }
+  };
 
   const truncateStyle = {
     overflow: "hidden",
@@ -13,7 +28,12 @@ const ForumCards = ({ forumPosts }) => {
 
   return (
     <div className="container mt-5">
-      <h2 className="text-center mb-4">Recent Bartering Requests</h2>
+      <h2
+        className="text-center mb-4"
+        style={{ color: "#6f42c1", fontWeight: "bold" }}
+      >
+        Recent Bartering Requests
+      </h2>
       <Carousel
         indicators={false}
         style={{ maxWidth: "90%", margin: "auto" }}
@@ -92,11 +112,7 @@ const ForumCards = ({ forumPosts }) => {
                 </Card.Text>
                 <Button
                   variant="primary"
-                  onClick={() =>
-                    navigate("/full-profile-view", {
-                      state: { profile: post },
-                    })
-                  }
+                  onClick={() => handleViewProfile(post)}
                   style={{
                     backgroundColor: "#6A38C2",
                     border: "none",
