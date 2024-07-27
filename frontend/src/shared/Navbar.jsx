@@ -9,7 +9,6 @@ const CustomNavbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user data exists in localStorage to manage authentication status
     const userData = localStorage.getItem("user");
     if (userData) {
       setIsLoggedIn(true);
@@ -25,7 +24,12 @@ const CustomNavbar = () => {
   };
 
   return (
-    <Navbar bg="white" expand="lg" className="shadow-sm">
+    <Navbar
+      bg="white"
+      expand="lg"
+      className="shadow-sm"
+      style={{ padding: "10px 20px" }}
+    >
       <Container fluid>
         <Navbar.Brand as={Link} to="/" className="font-weight-bold">
           Skill<span style={{ color: "#F83002" }}>Barter</span>
@@ -33,10 +37,14 @@ const CustomNavbar = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav">
           <FaBars />
         </Navbar.Toggle>
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ml-auto align-items-center">
-            <Nav.Link as={Link} to="/" className="font-weight-bold">
-              Home
+        <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
+          <Nav className="align-items-center text-center text-lg-left">
+            <Nav.Link
+              as={Link}
+              to={isLoggedIn ? "/dashboard" : "/"}
+              className="font-weight-bold"
+            >
+              {isLoggedIn ? "Dashboard" : "Home"}
             </Nav.Link>
             <Nav.Link as={Link} to="/skills" className="font-weight-bold">
               Skills
@@ -46,7 +54,11 @@ const CustomNavbar = () => {
             </Nav.Link>
             {isLoggedIn ? (
               <Dropdown align="end">
-                <Dropdown.Toggle as={Nav.Link} className="p-0">
+                <Dropdown.Toggle
+                  as={Nav.Link}
+                  className="p-0"
+                  style={{ border: "none", background: "none" }}
+                >
                   <img
                     src="https://via.placeholder.com/40"
                     alt="Profile"
@@ -54,6 +66,7 @@ const CustomNavbar = () => {
                       width: "40px",
                       height: "40px",
                       borderRadius: "50%",
+                      transition: "transform 0.3s ease",
                     }}
                   />
                 </Dropdown.Toggle>
@@ -67,24 +80,35 @@ const CustomNavbar = () => {
                 </Dropdown.Menu>
               </Dropdown>
             ) : (
-              <>
-                <Nav.Link as={Link} to="/login" className="p-0">
+              <div className="d-flex flex-column flex-lg-row align-items-center mt-2 mt-lg-0">
+                <Nav.Link
+                  as={Link}
+                  to="/login"
+                  className="p-0 mb-2 mb-lg-0 mr-lg-2"
+                >
                   <Button
                     variant="outline-secondary"
-                    className="mr-2"
-                    style={{ marginRight: "10px" }}
+                    className="w-100 w-lg-auto"
+                    style={{
+                      transition: "transform 0.3s ease",
+                    }}
                   >
                     Login
                   </Button>
                 </Nav.Link>
                 <Nav.Link as={Link} to="/signup" className="p-0">
                   <Button
-                    style={{ backgroundColor: "#6A38C2", color: "white" }}
+                    className="w-100 w-lg-auto"
+                    style={{
+                      backgroundColor: "#6A38C2",
+                      color: "white",
+                      transition: "transform 0.3s ease",
+                    }}
                   >
                     Signup
                   </Button>
                 </Nav.Link>
-              </>
+              </div>
             )}
           </Nav>
         </Navbar.Collapse>
