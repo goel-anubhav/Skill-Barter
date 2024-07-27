@@ -93,8 +93,8 @@ const ForumCards = ({ forumPosts }) => {
                 <Button
                   variant="primary"
                   onClick={() =>
-                    navigate("/profile-view", {
-                      state: { searchType: "profile", searchTerm: post.name },
+                    navigate("/full-profile-view", {
+                      state: { profile: post },
                     })
                   }
                   style={{
