@@ -35,6 +35,23 @@ function App() {
             />
             <Route
               path="/dashboard"
+              element={<Example />}/>
+            <Route
+              path="/update-profile"
+              element={<Updateprofile />}     />
+            <Route
+              path="/profile-view"
+              element={<PublicProfileView />}
+            />
+            <Route
+              path="/full-profile-view"
+              element={<FullProfileView />}
+            />
+            <Route path="*" element={<NotFound />} />{" "}
+
+
+            {/* <Route
+              path="/dashboard"
               element={<ProtectedRoute element={<Example />} />}
             />
             <Route
@@ -49,7 +66,7 @@ function App() {
               path="/full-profile-view"
               element={<ProtectedRoute element={<FullProfileView />} />}
             />
-            <Route path="*" element={<NotFound />} />{" "}
+            <Route path="*" element={<NotFound />} />{" "} */}
             {/* Add this route as the last one */}
           </Routes>
         </div>

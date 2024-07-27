@@ -5,21 +5,6 @@ import { useNavigate } from "react-router-dom";
 const ForumCards = ({ forumPosts = [] }) => {
   const navigate = useNavigate();
 
-  const isAuthenticated = () => {
-    // Replace this with your actual logic for checking if a user is authenticated
-    return localStorage.getItem("authToken") !== null;
-  };
-
-  const handleViewProfile = (post) => {
-    if (isAuthenticated()) {
-      navigate("/full-profile-view", {
-        state: { profile: post },
-      });
-    } else {
-      navigate("/login");
-    }
-  };
-
   const truncateStyle = {
     overflow: "hidden",
     whiteSpace: "nowrap",
@@ -112,7 +97,11 @@ const ForumCards = ({ forumPosts = [] }) => {
                 </Card.Text>
                 <Button
                   variant="primary"
-                  onClick={() => handleViewProfile(post)}
+                  onClick={() =>
+                    navigate("/full-profile-view", {
+                      state: { profile: post },
+                    })
+                  }
                   style={{
                     backgroundColor: "#6A38C2",
                     border: "none",
