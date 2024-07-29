@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
+import { Modal, Button } from "react-bootstrap";
 
 function SignupForm() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -11,12 +12,12 @@ function SignupForm() {
     email: "",
     phoneNumber: "",
     password: "",
-    otp: "",
   });
+  const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [phoneError, setPhoneError] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
   const navigate = useNavigate();
 
   const handleImageChange = (event) => {
@@ -39,19 +40,6 @@ function SignupForm() {
     }
   };
 
-  const handleSendOtp = async () => {
-    try {
-      await axios.post("http://localhost:8000/api/users/send-otp/", {
-        phone_number: formData.phoneNumber,
-      });
-      setOtpSent(true);
-      setMessage("OTP sent successfully!");
-    } catch (error) {
-      setMessage("Error sending OTP");
-      console.error(error.response ? error.response.data : error.message);
-    }
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -60,8 +48,7 @@ function SignupForm() {
       !formData.fullName ||
       !formData.email ||
       !formData.phoneNumber ||
-      !formData.password ||
-      !formData.otp
+      !formData.password
     ) {
       setMessage("Please fill all the fields");
       return;
@@ -90,26 +77,50 @@ function SignupForm() {
     data.append("email", formData.email);
     data.append("phone_number", formData.phoneNumber);
     data.append("password", formData.password);
-    data.append("otp", formData.otp);
     if (selectedImage) {
       data.append("profile_picture", selectedImage);
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/users/signup/",
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      setMessage("Signup successful!");
-      navigate("/registration");
+      await axios.post("http://localhost:8000/api/users/signup/", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setShowOtpModal(true);
     } catch (error) {
       setMessage("Error during signup");
       console.error(error.response ? error.response.data : error.message);
+    }
+  };
+
+  const handleOtpChange = (event) => {
+    setOtp(event.target.value);
+  };
+
+  const handleOtpSubmit = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/users/verify-otp/",
+        {
+          email: formData.email,
+          otp: otp,
+        }
+      );
+      if (response.data.success) {
+        setMessage("Signup and OTP verification successful!");
+        setShowOtpModal(false);
+        navigate("/registration");
+      } else {
+        setMessage("OTP verification failed. Please try again.");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.detail ||
+        "Error during OTP verification. Please check the OTP and try again.";
+      setMessage(errorMessage);
+      console.error(error.response ? error.response.data : error.message);
+      setShowOtpModal(false);
     }
   };
 
@@ -153,35 +164,8 @@ function SignupForm() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                disabled={otpSent}
               />
-              <button
-                type="button"
-                className="btn btn-secondary mt-2"
-                onClick={handleSendOtp}
-                disabled={otpSent}
-              >
-                Send OTP
-              </button>
             </div>
-            {otpSent && (
-              <div className="form-group">
-                <label htmlFor="otp" className="font-weight-bold">
-                  OTP
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="otp"
-                  name="otp"
-                  placeholder="Enter the OTP"
-                  autoComplete="off"
-                  value={formData.otp}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            )}
             <div className="form-group">
               <label htmlFor="phoneNumber" className="font-weight-bold">
                 Phone Number
@@ -270,6 +254,36 @@ function SignupForm() {
           </form>
         </div>
       </div>
+
+      <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>OTP Verification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-group">
+            <label htmlFor="otp" className="font-weight-bold">
+              Enter OTP
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="otp"
+              value={otp}
+              onChange={handleOtpChange}
+              placeholder="Enter the OTP"
+              required
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowOtpModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleOtpSubmit}>
+            Verify OTP
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

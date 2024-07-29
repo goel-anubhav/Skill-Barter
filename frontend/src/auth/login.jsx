@@ -31,9 +31,12 @@ function Login() {
         navigate("/dashboard"); // Redirect to a dashboard or homepage after login
       }
     } catch (error) {
-      setMessage("Error during login. Please Check Your E-Mail or Password and Try Again");
+      const errorMessage = error.response
+        ? error.response.data.detail || "An error occurred during login."
+        : error.message;
+      setMessage(errorMessage);
       setShowModal(true);
-      console.error(error.response ? error.response.data : error.message);
+      console.error(errorMessage);
     }
   };
 

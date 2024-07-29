@@ -11,13 +11,13 @@ const ForumCards = ({ forumPosts = [] }) => {
   };
 
   const handleViewProfile = (post) => {
-    if (isAuthenticated()) {
-      navigate("/full-profile-view", {
-        state: { profile: post },
-      });
-    } else {
-      navigate("/login");
-    }
+    // if (isAuthenticated()) {
+    navigate("/full-profile-view", {
+      state: { profile: post },
+    });
+    // } else {
+    //   navigate("/login");
+    // }
   };
 
   const truncateStyle = {

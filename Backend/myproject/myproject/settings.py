@@ -145,7 +145,7 @@ EMAIL_HOST_PASSWORD = 'your_email_password'
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Add your frontend URL here
+    "http://localhost:5173",  # Add your frontend URL here
     # Add other allowed origins as needed
 ]
 
