@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
+import { Modal, Button, Spinner } from "react-bootstrap";
 
 function SignupForm() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -11,12 +12,11 @@ function SignupForm() {
     email: "",
     phoneNumber: "",
     password: "",
-    otp: "",
   });
+  const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleImageChange = (event) => {
@@ -29,70 +29,26 @@ function SignupForm() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
-
-    if (name === "phoneNumber") {
-      if (/^\d{10}$/.test(value)) {
-        setPhoneError("");
-      } else {
-        setPhoneError("Phone number must be exactly 10 digits.");
-      }
-    }
   };
 
-  const handleSendOtp = async () => {
-    try {
-      await axios.post("http://localhost:8000/api/users/send-otp/", {
-        phone_number: formData.phoneNumber,
-      });
-      setOtpSent(true);
-      setMessage("OTP sent successfully!");
-    } catch (error) {
-      setMessage("Error sending OTP");
-      console.error(error.response ? error.response.data : error.message);
-    }
+  const handleOtpChange = (event) => {
+    setOtp(event.target.value);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    // Basic validation
-    if (
-      !formData.fullName ||
-      !formData.email ||
-      !formData.phoneNumber ||
-      !formData.password ||
-      !formData.otp
-    ) {
-      setMessage("Please fill all the fields");
-      return;
-    }
-
-    // Password validation
-    const passwordRegex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
-      setPasswordError(
-        "Password must contain at least one capital letter, one number, one special character, and be at least 8 characters long"
-      );
-      return;
-    }
-
-    if (phoneError) {
-      setMessage(phoneError);
-      return;
-    }
-
-    setPasswordError("");
-    setMessage("");
-
     const data = new FormData();
     data.append("full_name", formData.fullName);
     data.append("email", formData.email);
     data.append("phone_number", formData.phoneNumber);
     data.append("password", formData.password);
-    data.append("otp", formData.otp);
     if (selectedImage) {
       data.append("profile_picture", selectedImage);
+    }
+
+    // Log the FormData contents for debugging
+    for (let [key, value] of data.entries()) {
+      console.log(key, value);
     }
 
     try {
@@ -105,11 +61,44 @@ function SignupForm() {
           },
         }
       );
-      setMessage("Signup successful!");
-      navigate("/registration");
+      console.log("Signup response:", response.data);
+      setMessage("Signup successful! Please enter the OTP sent to your email.");
+      setShowOtpModal(true);
     } catch (error) {
       setMessage("Error during signup");
-      console.error(error.response ? error.response.data : error.message);
+      console.error(
+        "Signup error:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+
+  const handleOtpVerification = async () => {
+    setIsOtpLoading(true);
+    const otpPayload = {
+      email: formData.email,
+      otp: otp,
+    };
+
+    console.log("OTP Payload:", otpPayload); // Log the OTP payload
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/users/verify-otp/",
+        otpPayload
+      );
+      console.log("OTP verification response:", response.data);
+      setMessage("OTP verified successfully!");
+      setShowOtpModal(false);
+      navigate("/registration");
+    } catch (error) {
+      setMessage("Error verifying OTP");
+      console.error(
+        "OTP Verification Error:",
+        error.response ? error.response.data : error.message
+      );
+    } finally {
+      setIsOtpLoading(false);
     }
   };
 
@@ -118,7 +107,7 @@ function SignupForm() {
       <CustomNavbar className="fixed-top" />
       <div
         className="container d-flex justify-content-center align-items-start vh-100 pt-2"
-        style={{ marginTop: "70px", marginBottom: "70px" }}
+        style={{ marginTop: "70px" }}
       >
         <div className="card p-4 w-100" style={{ maxWidth: "600px" }}>
           <h3 className="text-center mb-4">Sign Up</h3>
@@ -153,35 +142,8 @@ function SignupForm() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                disabled={otpSent}
               />
-              <button
-                type="button"
-                className="btn btn-secondary mt-2"
-                onClick={handleSendOtp}
-                disabled={otpSent}
-              >
-                Send OTP
-              </button>
             </div>
-            {otpSent && (
-              <div className="form-group">
-                <label htmlFor="otp" className="font-weight-bold">
-                  OTP
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="otp"
-                  name="otp"
-                  placeholder="Enter the OTP"
-                  autoComplete="off"
-                  value={formData.otp}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            )}
             <div className="form-group">
               <label htmlFor="phoneNumber" className="font-weight-bold">
                 Phone Number
@@ -197,9 +159,6 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
-              {phoneError && (
-                <small className="text-danger">{phoneError}</small>
-              )}
             </div>
             <div className="form-group">
               <label htmlFor="password" className="font-weight-bold">
@@ -216,13 +175,6 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
-              {passwordError && (
-                <small className="text-danger">{passwordError}</small>
-              )}
-              <small className="form-text text-muted">
-                Password must contain at least one capital letter, one number,
-                one special character, and be at least 8 characters long.
-              </small>
             </div>
             <div className="form-group">
               <label htmlFor="profilePicture" className="font-weight-bold">
@@ -270,6 +222,48 @@ function SignupForm() {
           </form>
         </div>
       </div>
+
+      <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>OTP Verification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-group">
+            <label htmlFor="otp" className="font-weight-bold">
+              Enter OTP
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="otp"
+              name="otp"
+              placeholder="Enter the OTP"
+              autoComplete="off"
+              value={otp}
+              onChange={handleOtpChange}
+              required
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowOtpModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleOtpVerification}>
+            {isOtpLoading ? (
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />
+            ) : (
+              "Verify OTP"
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

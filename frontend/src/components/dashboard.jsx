@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import CustomNavbar from "../shared/Navbar";
 import ForumCards from "./forumCards";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { statesOfIndia } from "../auth/states";
-import { skillsOptions } from "../auth/skills";
 import { forumPosts } from "./forumsSampleData";
 
 const Dashboard = () => {
@@ -14,10 +12,28 @@ const Dashboard = () => {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedDesiredSkills, setSelectedDesiredSkills] = useState([]);
   const [forumPostsList, setForumPostsList] = useState(forumPosts);
+  const [skillsOptions, setSkillsOptions] = useState([]);
+  const [citiesOptions, setCitiesOptions] = useState([]);
   const skillsRef = useRef(null);
   const locationsRef = useRef(null);
   const forumRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/users/")
+      .then((response) => response.json())
+      .then((data) => {
+        const skills = new Set();
+        const cities = new Set();
+        data.forEach((user) => {
+          skills.add(user.skills);
+          cities.add(user.city);
+        });
+        setSkillsOptions([...skills]);
+        setCitiesOptions([...cities]);
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   const toggleSkills = () => {
     setShowSkills(!showSkills);
@@ -240,9 +256,9 @@ const Dashboard = () => {
                   <option value="" disabled>
                     Select a location
                   </option>
-                  {statesOfIndia.map((state, index) => (
-                    <option key={index} value={state}>
-                      {state}
+                  {citiesOptions.map((city, index) => (
+                    <option key={index} value={city}>
+                      {city}
                     </option>
                   ))}
                 </select>

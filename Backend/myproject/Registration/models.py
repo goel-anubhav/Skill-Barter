@@ -1,5 +1,3 @@
-
-
 from django.db import models
 
 class User(models.Model):
@@ -11,8 +9,8 @@ class User(models.Model):
     qualification = models.CharField(max_length=100)
     year_of_experience = models.IntegerField()
     skills = models.TextField()
-    certification1 = models.CharField(max_length=255, blank=True, null=True)
-    certification2 = models.CharField(max_length=255, blank=True, null=True)
+    certification1 = models.FileField(upload_to='certifications/', blank=True, null=True)
+    certification2 = models.FileField(upload_to='certifications/', blank=True, null=True)
     desired_skills = models.TextField()
     is_approved = models.BooleanField(default=False)
     profile_picture = models.ImageField(upload_to='received_profile_pictures/', null=True, blank=True)

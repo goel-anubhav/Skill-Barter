@@ -131,13 +131,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 
-# Add the following configurations for email backend
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'your_email_host'
-EMAIL_PORT = '587'
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your_email'
-EMAIL_HOST_PASSWORD = 'your_email_password'
+
+
 
 
 
@@ -145,7 +140,7 @@ EMAIL_HOST_PASSWORD = 'your_email_password'
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Add your frontend URL here
+    "http://localhost:5173",  # Add your frontend URL here
     # Add other allowed origins as needed
 ]
 

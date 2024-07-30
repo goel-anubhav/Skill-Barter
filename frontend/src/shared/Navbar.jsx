@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Navbar, Nav, Button, Container, Dropdown } from "react-bootstrap";
-import { FaBars } from "react-icons/fa";
+import {
+  Navbar,
+  Nav,
+  Button,
+  Container,
+  Dropdown,
+  Badge,
+} from "react-bootstrap";
+import { FaBars, FaBell } from "react-icons/fa";
+import { notifications as sampleNotifications } from "./notificationSample";
 
 const CustomNavbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,14 +23,35 @@ const CustomNavbar = () => {
     if (userData) {
       setIsLoggedIn(true);
       setUser(JSON.parse(userData));
+      fetchNotifications();
     }
   }, []);
+
+  const fetchNotifications = async () => {
+    setNotifications(sampleNotifications);
+    setUnreadCount(sampleNotifications.filter((notif) => !notif.read).length);
+  };
 
   const handleSignOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     navigate("/login");
+  };
+
+  const handleNotificationClick = async (notificationId) => {
+    const updatedNotifications = notifications.map((notification) =>
+      notification.id === notificationId
+        ? { ...notification, read: true }
+        : notification
+    );
+    setNotifications(updatedNotifications);
+    setUnreadCount(updatedNotifications.filter((notif) => !notif.read).length);
+  };
+
+  const handleClearAll = () => {
+    setNotifications([]);
+    setUnreadCount(0);
   };
 
   return (
@@ -31,7 +62,12 @@ const CustomNavbar = () => {
       style={{ padding: "10px 20px" }}
     >
       <Container fluid>
-        <Navbar.Brand as={Link} to="/" className="font-weight-bold">
+        <Navbar.Brand
+          as={Link}
+          to="/"
+          className="font-weight-bold"
+          style={{ transition: "transform 0.3s ease" }}
+        >
           Skill<span style={{ color: "#F83002" }}>Barter</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav">
@@ -53,32 +89,75 @@ const CustomNavbar = () => {
               Locations
             </Nav.Link>
             {isLoggedIn ? (
-              <Dropdown align="end">
-                <Dropdown.Toggle
-                  as={Nav.Link}
-                  className="p-0"
-                  style={{ border: "none", background: "none" }}
-                >
-                  <img
-                    src="https://via.placeholder.com/40"
-                    alt="Profile"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      transition: "transform 0.3s ease",
-                    }}
-                  />
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => navigate("/update-profile")}>
-                    Edit Profile
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={handleSignOut}>
-                    Sign Out
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+              <>
+                <Dropdown align="end" className="mr-lg-3 mb-2 mb-lg-0">
+                  <Dropdown.Toggle
+                    as={Button}
+                    variant="link"
+                    id="dropdown-notifications"
+                    className="position-relative p-0"
+                  >
+                    <FaBell size={24} />
+                    {unreadCount > 0 && (
+                      <Badge
+                        variant="danger"
+                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      >
+                        {unreadCount}
+                      </Badge>
+                    )}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu style={{ minWidth: "250px" }}>
+                    <div className="d-flex justify-content-between align-items-center px-3">
+                      <span>Notifications</span>
+                      <Button variant="link" size="sm" onClick={handleClearAll}>
+                        Clear All
+                      </Button>
+                    </div>
+                    <Dropdown.Divider />
+                    {notifications.length > 0 ? (
+                      notifications.map((notification) => (
+                        <Dropdown.Item
+                          key={notification.id}
+                          onClick={() =>
+                            handleNotificationClick(notification.id)
+                          }
+                        >
+                          {notification.message}
+                        </Dropdown.Item>
+                      ))
+                    ) : (
+                      <Dropdown.Item>No bartering requests</Dropdown.Item>
+                    )}
+                  </Dropdown.Menu>
+                </Dropdown>
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    as={Nav.Link}
+                    className="p-0"
+                    style={{ border: "none", background: "none" }}
+                  >
+                    <img
+                      src="https://via.placeholder.com/40"
+                      alt="Profile"
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "50%",
+                        transition: "transform 0.3s ease",
+                      }}
+                    />
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item onClick={() => navigate("/update-profile")}>
+                      Edit Profile
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={handleSignOut}>
+                      Sign Out
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </>
             ) : (
               <div className="d-flex flex-column flex-lg-row align-items-center mt-2 mt-lg-0">
                 <Nav.Link
@@ -89,9 +168,7 @@ const CustomNavbar = () => {
                   <Button
                     variant="outline-secondary"
                     className="w-100 w-lg-auto"
-                    style={{
-                      transition: "transform 0.3s ease",
-                    }}
+                    style={{ transition: "transform 0.3s ease" }}
                   >
                     Login
                   </Button>
