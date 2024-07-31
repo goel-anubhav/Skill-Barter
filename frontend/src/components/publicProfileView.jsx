@@ -59,6 +59,10 @@ const PublicProfileView = () => {
     navigate("/dashboard");
   };
 
+  const handleViewProfile = (profile) => {
+    navigate("/full-profile-view", { state: { profile } });
+  };
+
   return (
     <>
       <CustomNavbar />
@@ -109,6 +113,29 @@ const PublicProfileView = () => {
           {filteredProfiles.map((profile) => (
             <Col md={6} lg={4} key={profile.id} className="mb-4">
               <CardComponent profile={profile} />
+              <Button
+                variant="primary"
+                onClick={() => handleViewProfile(profile)}
+                style={{
+                  backgroundColor: "#F83002",
+                  border: "none",
+                  borderRadius: "20px",
+                  padding: "10px 20px",
+                  fontWeight: "bold",
+                  marginTop: "10px",
+                  color: "white",
+                  transition: "background-color 0.3s ease",
+                  marginBottom: "20px", // Increased space below each card
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#6A38C2")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#F83002")
+                }
+              >
+                View Profile
+              </Button>
             </Col>
           ))}
         </Row>
@@ -125,9 +152,10 @@ const PublicProfileView = () => {
               transition: "background-color 0.3s ease",
               backgroundColor: "#6A38C2",
               borderColor: "#6A38C2",
+              marginTop: "20px", // Space above the button
             }}
             onMouseOver={(e) =>
-              (e.currentTarget.style.backgroundColor = "#5f32ad")
+              (e.currentTarget.style.backgroundColor = "#F83002")
             }
             onMouseOut={(e) =>
               (e.currentTarget.style.backgroundColor = "#6A38C2")
