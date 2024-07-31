@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Button, Dropdown } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import CustomNavbar from "../shared/Navbar";
@@ -9,9 +9,12 @@ const PublicProfileView = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { searchType, searchTerm } = location.state || {};
+  const [profiles, setProfiles] = useState([]);
+  const [filteredProfiles, setFilteredProfiles] = useState([]);
+  const [filterOption, setFilterOption] = useState("");
 
   // Sample data, replace with actual data fetching logic
-  const profiles = [
+  const sampleProfiles = [
     {
       id: 1,
       name: "John Doe",
@@ -34,7 +37,23 @@ const PublicProfileView = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Simulate fetching data
+    setProfiles(sampleProfiles);
+    setFilteredProfiles(sampleProfiles);
   }, []);
+
+  const handleFilter = (option) => {
+    setFilterOption(option);
+    if (searchType === "skill") {
+      setFilteredProfiles(
+        profiles.filter((profile) => profile.location === option)
+      );
+    } else {
+      setFilteredProfiles(
+        profiles.filter((profile) => profile.skills.includes(option))
+      );
+    }
+  };
 
   const handleSearchAgain = () => {
     navigate("/dashboard");
@@ -50,8 +69,44 @@ const PublicProfileView = () => {
             ? `Skill: ${searchTerm}`
             : `Location: ${searchTerm}`}
         </h2>
+        <div className="d-flex justify-content-center mb-4">
+          <Dropdown>
+            <Dropdown.Toggle
+              variant="secondary"
+              id="filter-dropdown"
+              style={{
+                backgroundColor: "#6A38C2",
+                border: "none",
+                padding: "10px 20px",
+                fontSize: "16px",
+                fontWeight: "bold",
+                borderRadius: "25px",
+              }}
+            >
+              {searchType === "skill"
+                ? "Filter by Location"
+                : "Filter by Skill"}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              {(searchType === "skill"
+                ? profiles.map((profile) => profile.location)
+                : profiles.flatMap((profile) => profile.skills)
+              )
+                .filter((value, index, self) => self.indexOf(value) === index) // unique values
+                .map((option, index) => (
+                  <Dropdown.Item
+                    key={index}
+                    onClick={() => handleFilter(option)}
+                  >
+                    {option}
+                  </Dropdown.Item>
+                ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
         <Row>
-          {profiles.map((profile) => (
+          {filteredProfiles.map((profile) => (
             <Col md={6} lg={4} key={profile.id} className="mb-4">
               <CardComponent profile={profile} />
             </Col>
@@ -68,6 +123,8 @@ const PublicProfileView = () => {
               fontWeight: "bold",
               borderRadius: "25px",
               transition: "background-color 0.3s ease",
+              backgroundColor: "#6A38C2",
+              borderColor: "#6A38C2",
             }}
             onMouseOver={(e) =>
               (e.currentTarget.style.backgroundColor = "#5f32ad")

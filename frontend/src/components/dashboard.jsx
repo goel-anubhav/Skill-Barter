@@ -99,15 +99,19 @@ const Dashboard = () => {
   };
 
   const handleSearchBySkill = () => {
-    navigate("/profile-view", {
-      state: { searchType: "skill", searchTerm: selectedSkill },
-    });
+    if (selectedSkill) {
+      navigate("/profile-view", {
+        state: { searchType: "skill", searchTerm: selectedSkill },
+      });
+    }
   };
 
   const handleSearchByLocation = () => {
-    navigate("/profile-view", {
-      state: { searchType: "location", searchTerm: selectedLocation },
-    });
+    if (selectedLocation) {
+      navigate("/profile-view", {
+        state: { searchType: "location", searchTerm: selectedLocation },
+      });
+    }
   };
 
   useEffect(() => {
@@ -234,6 +238,7 @@ const Dashboard = () => {
                 type="button"
                 className="btn btn-primary mt-2"
                 onClick={handleSearchBySkill}
+                disabled={!selectedSkill}
               >
                 Search
               </button>
@@ -267,6 +272,7 @@ const Dashboard = () => {
                 type="button"
                 className="btn btn-primary mt-2"
                 onClick={handleSearchByLocation}
+                disabled={!selectedLocation}
               >
                 Search
               </button>
@@ -319,23 +325,38 @@ const Dashboard = () => {
             Post
           </button>
         </form>
-        <div className="mt-5">
+        <div
+          className="mt-5"
+          style={{ maxHeight: "400px", overflowY: "scroll" }}
+        >
           <h3>All Forum Posts</h3>
           {forumPostsList.length === 0 ? (
             <p>No posts yet. Be the first to post!</p>
           ) : (
-            <ul className="list-group">
-              {forumPostsList.map((post, index) => (
-                <li key={index} className="list-group-item">
-                  <h5>{post.name}</h5>
-                  <p>{post.message}</p>
-                  <p>
-                    <strong>Desired Skills:</strong>{" "}
-                    {post.desiredSkills.join(", ")}
-                  </p>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="list-group">
+                {forumPostsList.slice(0, 5).map((post, index) => (
+                  <li key={index} className="list-group-item">
+                    <h5>{post.name}</h5>
+                    <p>{post.message}</p>
+                    <p>
+                      <strong>Desired Skills:</strong>{" "}
+                      {post.desiredSkills.join(", ")}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              {forumPostsList.length > 5 && (
+                <div className="text-center mt-3">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setForumPostsList(forumPostsList.slice(5))}
+                  >
+                    Load More
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
