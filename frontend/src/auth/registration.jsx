@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "./states";
@@ -12,27 +12,44 @@ const years = Array.from({ length: 31 }, (_, i) => ({
   value: i,
   label: `${i} years`,
 }));
-// const months = Array.from({ length: 12 }, (_, i) => ({
-//   value: i,
-//   label: `${i} months`,
-// }));
 
-function Registration({ email }) {
+function Registration() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user data exists in localStorage to manage access validation
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      navigate("/signup");
+    } else {
+      const user = JSON.parse(userData);
+      console.log("User data from localStorage:", user); // Debugging line
+      setFormData((prevData) => ({
+        ...prevData,
+        full_name: user.full_name, // Adjusted key names
+        email: user.email,
+        phone_number: user.phone_number, // Adjusted key names
+      }));
+      setDisabledFields(true);
+    }
+  }, [navigate]);
+
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: email || "",
-    phoneNumber: "",
+    full_name: "",
+    email: "",
+    phone_number: "",
     city: "",
     state: null,
     skills: [],
     desiredSkills: [],
     year_of_experience: null,
-    // month_of_experience: null,
     qualification: null,
   });
+
   const [selectedFile1, setSelectedFile1] = useState(null);
   const [selectedFile2, setSelectedFile2] = useState(null);
   const [message, setMessage] = useState("");
+  const [disabledFields, setDisabledFields] = useState(false);
 
   const handleChange = (name, value) => {
     setFormData((prevState) => ({
@@ -55,24 +72,18 @@ function Registration({ email }) {
     }
   };
 
-  const navigate = useNavigate();
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData();
-    data.append("full_name", formData.fullName);
+    data.append("full_name", formData.full_name);
     data.append("email", formData.email);
-    data.append("phone_number", formData.phoneNumber);
+    data.append("phone_number", formData.phone_number);
     data.append("city", formData.city);
     data.append("state", formData.state ? formData.state.value : "");
     data.append(
       "year_of_experience",
       formData.year_of_experience ? formData.year_of_experience.value : 0
     );
-    // data.append(
-    //   "month_of_experience",
-    //   formData.month_of_experience ? formData.month_of_experience.value : 0
-    // );
     data.append(
       "qualification",
       formData.qualification ? formData.qualification.value : ""
@@ -121,19 +132,22 @@ function Registration({ email }) {
               <form onSubmit={handleSubmit}>
                 <div className="row mb-3">
                   <div className="col-md-6 mb-3 mb-md-0">
-                    <label htmlFor="fullName" className="form-label">
+                    <label htmlFor="full_name" className="form-label">
                       Full Name
                     </label>
                     <input
                       type="text"
                       className="form-control"
-                      id="fullName"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={(e) => handleChange("fullName", e.target.value)}
+                      id="full_name"
+                      name="full_name"
+                      value={formData.full_name}
+                      onChange={(e) =>
+                        handleChange("full_name", e.target.value)
+                      }
                       placeholder="Full Name"
                       autoComplete="off"
                       required
+                      disabled={disabledFields}
                     />
                   </div>
                   <div className="col-md-6">
@@ -150,26 +164,28 @@ function Registration({ email }) {
                       placeholder="Email"
                       autoComplete="off"
                       required
+                      disabled={disabledFields}
                     />
                   </div>
                 </div>
                 <div className="row mb-3">
                   <div className="col-md-6 mb-3 mb-md-0">
-                    <label htmlFor="phoneNumber" className="form-label">
+                    <label htmlFor="phone_number" className="form-label">
                       Phone Number
                     </label>
                     <input
                       type="tel"
                       className="form-control"
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
+                      id="phone_number"
+                      name="phone_number"
+                      value={formData.phone_number}
                       onChange={(e) =>
-                        handleChange("phoneNumber", e.target.value)
+                        handleChange("phone_number", e.target.value)
                       }
                       placeholder="Phone Number"
                       autoComplete="off"
                       required
+                      disabled={disabledFields}
                     />
                   </div>
                   <div className="col-md-6">
@@ -246,17 +262,6 @@ function Registration({ email }) {
                         className="mr-2"
                         required
                       />
-                      {/* <Select
-                        id="month_of_experience"
-                        name="month_of_experience"
-                        options={months}
-                        value={formData.month_of_experience}
-                        onChange={(selectedOption) =>
-                          handleChange("month_of_experience", selectedOption)
-                        }
-                        placeholder="Months"
-                        required
-                      /> */}
                     </div>
                   </div>
                   <div className="col-md-6">
