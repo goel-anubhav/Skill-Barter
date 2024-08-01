@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
+import { Modal, Button } from "react-bootstrap";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
@@ -18,7 +20,8 @@ function Login() {
       const user = usersResponse.data.find((user) => user.email === email);
 
       if (!user) {
-        setMessage("User does not exist. Please complete your registration.");
+        setMessage("Please complete your registration.");
+        setShowModal(true);
         return;
       }
 
@@ -26,6 +29,7 @@ function Login() {
         setMessage(
           "Your account is not approved yet. Please wait for approval."
         );
+        setShowModal(true);
         return;
       }
 
@@ -111,6 +115,21 @@ function Login() {
           </form>
         </div>
       </div>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Registration Required</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{message}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={() => navigate("/signup")}>
+            Go to Registration
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

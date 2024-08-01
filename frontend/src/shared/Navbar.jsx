@@ -14,6 +14,7 @@ import { notifications as sampleNotifications } from "./notificationSample";
 const CustomNavbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [profilePicture, setProfilePicture] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
@@ -21,8 +22,10 @@ const CustomNavbar = () => {
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
+      const parsedUser = JSON.parse(userData);
       setIsLoggedIn(true);
-      setUser(JSON.parse(userData));
+      setUser(parsedUser);
+      setProfilePicture(`http://localhost:8000${parsedUser.profile_picture}`);
       fetchNotifications();
     }
   }, []);
@@ -138,7 +141,7 @@ const CustomNavbar = () => {
                     style={{ border: "none", background: "none" }}
                   >
                     <img
-                      src="https://via.placeholder.com/40"
+                      src={profilePicture}
                       alt="Profile"
                       style={{
                         width: "40px",
@@ -146,6 +149,9 @@ const CustomNavbar = () => {
                         borderRadius: "50%",
                         transition: "transform 0.3s ease",
                       }}
+                      onError={(e) =>
+                        (e.target.src = "https://via.placeholder.com/40")
+                      }
                     />
                   </Dropdown.Toggle>
                   <Dropdown.Menu>

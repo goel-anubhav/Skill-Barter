@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Select from "react-select";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "./states";
@@ -15,24 +15,6 @@ const years = Array.from({ length: 31 }, (_, i) => ({
 
 function Registration() {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Check if user data exists in localStorage to manage access validation
-    const userData = localStorage.getItem("user");
-    if (!userData) {
-      navigate("/signup");
-    } else {
-      const user = JSON.parse(userData);
-      console.log("User data from localStorage:", user); // Debugging line
-      setFormData((prevData) => ({
-        ...prevData,
-        full_name: user.full_name, // Adjusted key names
-        email: user.email,
-        phone_number: user.phone_number, // Adjusted key names
-      }));
-      setDisabledFields(true);
-    }
-  }, [navigate]);
 
   const [formData, setFormData] = useState({
     full_name: "",
