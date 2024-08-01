@@ -13,6 +13,23 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
+      // First, check if the user exists and is approved
+      const usersResponse = await axios.get("http://localhost:8000/api/users/");
+      const user = usersResponse.data.find((user) => user.email === email);
+
+      if (!user) {
+        setMessage("User does not exist. Please complete your registration.");
+        return;
+      }
+
+      if (!user.is_approved) {
+        setMessage(
+          "Your account is not approved yet. Please wait for approval."
+        );
+        return;
+      }
+
+      // Proceed with login if the user exists and is approved
       const response = await axios.post(
         "http://localhost:8000/api/users/login/",
         {
