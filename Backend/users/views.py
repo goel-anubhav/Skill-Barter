@@ -1,9 +1,9 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from .models import User
+from django.contrib.auth import authenticate
 from .serializers import UserCreateSerializer, UserSerializer
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -60,3 +60,15 @@ class OTPVerifyView(APIView):
             return Response({'error': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserProfilePictureView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, email):
+        try:
+            user = User.objects.get(email=email)
+            if user.profile_picture:
+                return Response({'profile_picture': user.profile_picture.url}, status=status.HTTP_200_OK)
+            return Response({'error': 'Profile picture not found'}, status=status.HTTP_404_NOT_FOUND)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)

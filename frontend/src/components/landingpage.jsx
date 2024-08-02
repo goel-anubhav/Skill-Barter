@@ -6,12 +6,13 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { skillsOptions } from "../auth/skills";
 import ForumCards from "./forumCards";
-import { forumPosts } from "./forumsSampleData"; // Import sample data
+import axios from "axios";
 
 function LandingPage() {
   const [currentSkill, setCurrentSkill] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [forumPosts, setForumPosts] = useState([]);
   const wrapperRef = useRef(null);
 
   useEffect(() => {
@@ -25,6 +26,57 @@ function LandingPage() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [wrapperRef]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/users/");
+        console.log("Users data:", response.data); // Log the users data
+
+        const formattedData = await Promise.all(
+          response.data.map(async (user) => {
+            const emailEncoded = user.email.replace("@", "%40");
+            let profilePicture = "https://via.placeholder.com/150";
+
+            try {
+              const profilePicResponse = await axios.get(
+                `http://127.0.0.1:8000/api/users/profile-picture/${emailEncoded}/`
+              );
+              const profilePicturePath =
+                profilePicResponse.data.profile_picture;
+              profilePicture = `http://127.0.0.1:8000${profilePicturePath}`;
+              console.log(
+                `Fetched profile picture for ${user.email}: ${profilePicture}`
+              );
+            } catch (error) {
+              console.error(
+                `Error fetching profile picture for ${user.email}`,
+                error
+              );
+            }
+
+            return {
+              id: user.id,
+              name: user.full_name,
+              location: `${user.city}, ${user.state}`,
+              skills: user.skills ? user.skills.split(", ") : [],
+              desiredSkills: user.desired_skills
+                ? user.desired_skills.split(", ")
+                : [],
+              rating: "4.5", // Assuming a default rating as the API does not provide it
+              img: profilePicture,
+              message: `Looking to exchange ${user.skills} skills for ${user.desired_skills} knowledge.`,
+            };
+          })
+        );
+        console.log("Formatted data:", formattedData); // Log the formatted data
+        setForumPosts(formattedData);
+      } catch (error) {
+        console.error("Error fetching data", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handlePrevClick = () => {
     setCurrentSkill(
@@ -181,7 +233,6 @@ function LandingPage() {
           </button>
         </div>
 
- 
         <ForumCards forumPosts={forumPosts} />
       </div>
     </>
