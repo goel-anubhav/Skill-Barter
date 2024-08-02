@@ -126,8 +126,8 @@ const UpdateProfile = () => {
     }
 
     try {
-      const response = await axios.put(
-        "http://localhost:8000/api/users/update-profile/",
+      const response = await axios.patch(
+        "http://localhost:8000/api/users/",
         data,
         {
           headers: {
