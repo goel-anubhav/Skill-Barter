@@ -155,6 +155,9 @@ const CustomNavbar = () => {
                     />
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
+                    <Dropdown.Item onClick={() => navigate("/view-profile")}>
+                      View Profile
+                    </Dropdown.Item>
                     <Dropdown.Item onClick={() => navigate("/update-profile")}>
                       Edit Profile
                     </Dropdown.Item>

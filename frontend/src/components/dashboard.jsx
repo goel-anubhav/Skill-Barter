@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import CustomNavbar from "../shared/Navbar";
 import ForumCards from "./forumCards";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { forumPosts } from "./forumsSampleData";
 
 const Dashboard = () => {
   const [showSkills, setShowSkills] = useState(false);
@@ -11,7 +10,7 @@ const Dashboard = () => {
   const [selectedSkill, setSelectedSkill] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedDesiredSkills, setSelectedDesiredSkills] = useState([]);
-  const [forumPostsList, setForumPostsList] = useState(forumPosts);
+  const [forumPostsList, setForumPostsList] = useState([]);
   const [skillsOptions, setSkillsOptions] = useState([]);
   const [citiesOptions, setCitiesOptions] = useState([]);
   const skillsRef = useRef(null);
@@ -25,12 +24,44 @@ const Dashboard = () => {
       .then((data) => {
         const skills = new Set();
         const cities = new Set();
-        data.forEach((user) => {
+        const formattedData = data.map((user) => {
+          const emailEncoded = user.email.replace("@", "%40");
+          const profilePictureURL = `http://127.0.0.1:8000/api/users/profile-picture/${emailEncoded}/`;
+
+          // Fetch the profile picture using the encoded email
+          fetch(profilePictureURL)
+            .then((response) => response.json())
+            .then((profileData) => {
+              const profilePicture = `http://127.0.0.1:8000${profileData.profile_picture}`;
+              // Update the user's profile picture
+              setForumPostsList((prevPosts) =>
+                prevPosts.map((post) =>
+                  post.id === user.id ? { ...post, img: profilePicture } : post
+                )
+              );
+            })
+            .catch((error) =>
+              console.error("Error fetching profile picture:", error)
+            );
+
           skills.add(user.skills);
           cities.add(user.city);
+          return {
+            id: user.id,
+            name: user.full_name,
+            location: `${user.city}, ${user.state}`,
+            skills: user.skills ? user.skills.split(", ") : [],
+            desiredSkills: user.desired_skills
+              ? user.desired_skills.split(", ")
+              : [],
+            rating: "4.5", // Assuming a default rating as the API does not provide it
+            img: "", // Placeholder until the image is fetched
+            message: `Looking to exchange ${user.skills} skills for ${user.desired_skills} knowledge.`,
+          };
         });
         setSkillsOptions([...skills]);
         setCitiesOptions([...cities]);
+        setForumPostsList(formattedData);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);

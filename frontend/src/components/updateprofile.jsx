@@ -31,7 +31,6 @@ const UpdateProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch user data from the server or local storage
     const fetchData = async () => {
       try {
         const userData = JSON.parse(localStorage.getItem("user"));
@@ -98,7 +97,6 @@ const UpdateProfile = () => {
     event.preventDefault();
     const data = new FormData();
     data.append("full_name", formData.fullName);
-    data.append("email", formData.email);
     data.append("phone_number", formData.phoneNumber);
     data.append("city", formData.city);
     data.append("state", formData.state ? formData.state.value : "");
@@ -127,7 +125,7 @@ const UpdateProfile = () => {
 
     try {
       const response = await axios.patch(
-        "http://localhost:8000/api/users/",
+        "http://localhost:8000/api/users/26/",
         data,
         {
           headers: {
@@ -166,7 +164,6 @@ const UpdateProfile = () => {
                       onChange={(e) => handleChange("fullName", e.target.value)}
                       placeholder="Full Name"
                       autoComplete="off"
-                      required
                     />
                   </div>
                   <div className="col-md-6">
@@ -182,7 +179,7 @@ const UpdateProfile = () => {
                       onChange={(e) => handleChange("email", e.target.value)}
                       placeholder="Email"
                       autoComplete="off"
-                      required
+                      readOnly
                     />
                   </div>
                 </div>
@@ -202,7 +199,6 @@ const UpdateProfile = () => {
                       }
                       placeholder="Phone Number"
                       autoComplete="off"
-                      required
                     />
                   </div>
                   <div className="col-md-6">
@@ -218,7 +214,6 @@ const UpdateProfile = () => {
                       onChange={(e) => handleChange("city", e.target.value)}
                       placeholder="City"
                       autoComplete="off"
-                      required
                     />
                   </div>
                 </div>
@@ -239,7 +234,6 @@ const UpdateProfile = () => {
                         handleChange("state", selectedOption)
                       }
                       placeholder="Select your state"
-                      required
                     />
                   </div>
                   <div className="col-md-6">
@@ -259,7 +253,6 @@ const UpdateProfile = () => {
                       }
                       placeholder="Select your qualification"
                       isSearchable
-                      required
                     />
                   </div>
                 </div>
@@ -277,7 +270,6 @@ const UpdateProfile = () => {
                         }
                         placeholder="Years"
                         className="mr-2"
-                        required
                       />
                     </div>
                   </div>
@@ -299,7 +291,6 @@ const UpdateProfile = () => {
                         handleChange("skills", selectedOptions)
                       }
                       placeholder="Select or type your skills"
-                      required
                     />
                   </div>
                 </div>
@@ -378,7 +369,6 @@ const UpdateProfile = () => {
                         handleChange("desiredSkills", selectedOptions)
                       }
                       placeholder="Select or type your desired skills"
-                      required
                     />
                   </div>
                 </div>

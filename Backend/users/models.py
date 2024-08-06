@@ -50,6 +50,5 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 
-# models.py
 
 

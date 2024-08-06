@@ -11,6 +11,8 @@ const ForumCards = ({ forumPosts = [] }) => {
     textOverflow: "ellipsis",
   };
 
+  const defaultImage = "https://via.placeholder.com/150"; // Placeholder image URL
+
   return (
     <div className="container mt-5">
       <h2
@@ -58,7 +60,7 @@ const ForumCards = ({ forumPosts = [] }) => {
             >
               <Card.Img
                 variant="top"
-                src={post.img}
+                src={post.img || defaultImage}
                 style={{ height: "150px", objectFit: "cover" }}
               />
               <Card.Body style={{ textAlign: "left" }}>
