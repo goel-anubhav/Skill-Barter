@@ -1,22 +1,81 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useSpring, animated } from "react-spring";
 import CustomNavbar from "../shared/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { statesOfIndia } from "../auth/states"; // Ensure this import is correct
+import { statesOfIndia } from "../auth/states";
+import { Alert, Modal, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const LocationFile = () => {
+  const [users, setUsers] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const navigate = useNavigate();
+
   const springProps = useSpring({
     to: { opacity: 1, transform: "scale(1)" },
     from: { opacity: 0, transform: "scale(0.5)" },
     config: { tension: 200, friction: 20 },
   });
 
-  const handleStateClick = (state) => {
-    const searchQuery = encodeURIComponent(state);
-    window.open(
-      `https://www.google.com/search?q=about%20${searchQuery}`,
-      "_blank"
-    );
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/users/");
+        const data = response.data;
+
+        const uniqueLocations = new Set(data.map((user) => user.state));
+        setLocations([...uniqueLocations]);
+      } catch (error) {
+        console.error("Error fetching locations", error);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+  const handleStateClick = async (state) => {
+    if (locations.includes(state)) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/users/?state=${encodeURIComponent(state)}`
+        );
+        const data = response.data;
+        if (data.length > 0) {
+          const formattedData = data.map((user) => ({
+            ...user,
+            skills: user.skills ? user.skills.split(", ") : [],
+            desiredSkills: user.desired_skills
+              ? user.desired_skills.split(", ")
+              : [],
+          }));
+          navigate("/profile-view", {
+            state: { users: formattedData, location: state },
+          });
+          setShowAlert(false);
+        } else {
+          setUsers([]);
+          setAlertMessage(
+            `No users found in ${state}. Be the first to sign up and barter your skills!`
+          );
+          setShowAlert(true);
+        }
+      } catch (error) {
+        console.error("Error fetching users by state", error);
+        setUsers([]);
+        setAlertMessage(
+          "An error occurred while fetching user profiles. Please try again later."
+        );
+        setShowAlert(true);
+      }
+    } else {
+      setAlertMessage(
+        `No users found in ${state}. Be the first to sign up and barter your skills!`
+      );
+      setShowAlert(true);
+    }
   };
 
   return (
@@ -81,6 +140,22 @@ const LocationFile = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="container mt-5">
+        {showAlert && (
+          <Modal show={showAlert} onHide={() => setShowAlert(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>No Users Found</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{alertMessage}</Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowAlert(false)}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        )}
       </div>
     </>
   );

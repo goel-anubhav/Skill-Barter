@@ -16,42 +16,57 @@ const FullProfileView = () => {
   const [alertVariant, setAlertVariant] = useState("success");
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
-
-  // Uncomment for the login validation
-  // useEffect(() => {
-  //   const userData = localStorage.getItem("user");
-  //   if (!userData) {
-  //     navigate("/login");
-  //   } else {
-  //     setUser(JSON.parse(userData)); // Assuming you have a user state to set
-  //   }
-  // }, [navigate]);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check if there is a pending request for the user
-    const checkPendingRequest = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8000/api/check-pending-request?profile_id=${profile.id}`
-        );
-        if (response.data.hasPendingRequest) {
-          setHasPendingRequest(true);
-        }
-      } catch (error) {
-        console.error(error.response ? error.response.data : error.message);
-      }
-    };
-    if (profile) {
-      checkPendingRequest();
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      navigate("/login");
+    } else {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      console.log("Logged-in user email:", parsedUser.email); // Log user email
     }
-  }, [profile]);
+  }, [navigate]);
+
+  useEffect(() => {
+    if (profile) {
+      console.log("Profile being viewed email:", profile.email); // Log profile email
+      // Check if there is a pending request for the user
+      const checkPendingRequest = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:8000/api/friends/list-requests/${profile.email}`
+          );
+          if (
+            response.data.some(
+              (request) =>
+                request.status === "pending" &&
+                request.sender_email === user.email
+            )
+          ) {
+            setHasPendingRequest(true);
+          }
+        } catch (error) {
+          console.error(error.response ? error.response.data : error.message);
+        }
+      };
+      if (profile && user) {
+        checkPendingRequest();
+      }
+    } else {
+      console.error("Profile data is missing or undefined");
+    }
+  }, [profile, user]);
 
   const handleSendRequest = async () => {
+    console.log("Sending request from:", user?.email, "to:", profile?.email); // Log send request details
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/send-request`,
+        `http://localhost:8000/api/friends/send-request/`,
         {
-          profile_id: profile.id,
+          sender: user.email,
+          receiver: profile.email,
           message: message,
         }
       );
@@ -67,7 +82,10 @@ const FullProfileView = () => {
       setShowModal(false);
       setShowAlert(true);
     } catch (error) {
-      setAlertMessage("Check network connectivity or try again later");
+      setAlertMessage(
+        error.response?.data?.error ||
+          "Check network connectivity or try again later"
+      );
       setAlertVariant("danger");
       setShowModal(false);
       setShowAlert(true);
@@ -85,9 +103,10 @@ const FullProfileView = () => {
     if (choice === "yes") {
       try {
         const response = await axios.post(
-          `http://localhost:8000/api/accept-request`,
+          `http://localhost:8000/api/friends/respond-request/${profile.id}/`,
           {
-            profile_id: profile.id,
+            status: "accepted",
+            receiver: profile.email,
           }
         );
 
@@ -105,15 +124,16 @@ const FullProfileView = () => {
       }
     } else if (choice === "no") {
       try {
-        const response = await axios.post(
-          `http://localhost:8000/api/delete-request`,
+        const response = await axios.patch(
+          `http://localhost:8000/api/friends/respond-request/${profile.id}/`,
           {
-            profile_id: profile.id,
+            status: "declined",
+            receiver: profile.email,
           }
         );
 
         if (response.data.success) {
-          setAlertMessage("Request has been deleted.");
+          setAlertMessage("Request has been declined.");
           setAlertVariant("success");
           setHasPendingRequest(false);
         } else {

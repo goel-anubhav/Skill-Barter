@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CustomNavbar from "../shared/Navbar";
 import ForumCards from "./forumCards";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
 
 const Dashboard = () => {
   const [showSkills, setShowSkills] = useState(false);
@@ -19,9 +20,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/users/")
-      .then((response) => response.json())
-      .then((data) => {
+    const fetchData = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/users/");
+        const data = response.data;
+
         const skills = new Set();
         const cities = new Set();
         const formattedData = data.map((user) => {
@@ -50,6 +54,7 @@ const Dashboard = () => {
             id: user.id,
             name: user.full_name,
             location: `${user.city}, ${user.state}`,
+            email: user.email, // Ensure the email is included in the profile data
             skills: user.skills ? user.skills.split(", ") : [],
             desiredSkills: user.desired_skills
               ? user.desired_skills.split(", ")
@@ -61,9 +66,13 @@ const Dashboard = () => {
         });
         setSkillsOptions([...skills]);
         setCitiesOptions([...cities]);
-        setForumPostsList(formattedData);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
+        setForumPostsList(formattedData.filter((post) => post.id !== user.id)); // Exclude the logged-in user's own post
+      } catch (error) {
+        console.error("Error fetching data", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const toggleSkills = () => {
@@ -254,6 +263,7 @@ const Dashboard = () => {
                   id="skillInput"
                   value={selectedSkill}
                   onChange={handleSkillChange}
+                  style={{ maxWidth: "100%", width: "100%" }}
                 >
                   <option value="" disabled>
                     Select a skill
@@ -267,7 +277,7 @@ const Dashboard = () => {
               </div>
               <button
                 type="button"
-                className="btn btn-primary mt-2"
+                className="btn btn-primary mt-2 w-100"
                 onClick={handleSearchBySkill}
                 disabled={!selectedSkill}
               >
@@ -288,6 +298,7 @@ const Dashboard = () => {
                   id="locationInput"
                   value={selectedLocation}
                   onChange={handleLocationChange}
+                  style={{ maxWidth: "100%", width: "100%" }}
                 >
                   <option value="" disabled>
                     Select a location
@@ -301,7 +312,7 @@ const Dashboard = () => {
               </div>
               <button
                 type="button"
-                className="btn btn-primary mt-2"
+                className="btn btn-primary mt-2 w-100"
                 onClick={handleSearchByLocation}
                 disabled={!selectedLocation}
               >
@@ -315,78 +326,72 @@ const Dashboard = () => {
       <ForumCards forumPosts={forumPostsList} />
 
       <div className="container mt-5" ref={forumRef}>
-        <h2>Forum</h2>
-        <p>Discuss and share your bartering experiences with others.</p>
-        <form onSubmit={handleForumSubmit}>
-          <div className="form-group">
-            <label htmlFor="forumTopic">Topic</label>
-            <input
-              type="text"
-              className="form-control"
-              id="forumTopic"
-              placeholder="Enter the topic"
-            />
-          </div>
-          <div className="form-group mt-3">
-            <label htmlFor="desiredSkillsInput">Select Desired Skills</label>
-            <select
-              className="form-control"
-              id="desiredSkillsInput"
-              multiple
-              value={selectedDesiredSkills}
-              onChange={handleDesiredSkillsChange}
-            >
-              {skillsOptions.map((skill, index) => (
-                <option key={index} value={skill}>
-                  {skill}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="forumMessage">Message</label>
-            <textarea
-              className="form-control"
-              id="forumMessage"
-              rows="3"
-              placeholder="Enter your message"
-            ></textarea>
-          </div>
-          <button type="submit" className="btn btn-primary mt-2">
-            Post
-          </button>
-        </form>
         <div
           className="mt-5"
-          style={{ maxHeight: "400px", overflowY: "scroll" }}
+          style={{
+            maxHeight: "400px",
+            overflowY: "auto",
+            paddingRight: "15px",
+            marginTop: "20px",
+            margin: "auto",
+            transition: "max-height 0.3s ease",
+            borderRadius: "10px",
+            maxWidth: "800px",
+          }}
         >
-          <h3>All Forum Posts</h3>
+          <h3 className="text-center mb-4">All Forum Posts</h3>
           {forumPostsList.length === 0 ? (
-            <p>No posts yet. Be the first to post!</p>
+            <p className="text-center">No posts yet. Be the first to post!</p>
           ) : (
             <>
               <ul className="list-group">
-                {forumPostsList.slice(0, 5).map((post, index) => (
-                  <li key={index} className="list-group-item">
-                    <h5>{post.name}</h5>
-                    <p>{post.message}</p>
-                    <p>
-                      <strong>Desired Skills:</strong>{" "}
-                      {post.desiredSkills.join(", ")}
-                    </p>
+                {forumPostsList.map((post, index) => (
+                  <li
+                    key={index}
+                    className="list-group-item"
+                    style={{
+                      marginBottom: "15px",
+                      padding: "20px",
+                      transition: "transform 0.3s ease",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() =>
+                      navigate("/full-profile-view", {
+                        state: { profile: post },
+                      })
+                    }
+                    onMouseOver={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.02)")
+                    }
+                    onMouseOut={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  >
+                    <div className="d-flex align-items-center">
+                      <img
+                        src={post.img}
+                        alt="Profile"
+                        className="rounded-circle mr-3"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                          marginRight: "15px",
+                        }}
+                      />
+                      <div>
+                        <h5>{post.name}</h5>
+                        <p>{post.message}</p>
+                        <p>
+                          <strong>Desired Skills:</strong>{" "}
+                          {post.desiredSkills.join(", ")}
+                        </p>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
-              {forumPostsList.length > 5 && (
-                <div className="text-center mt-3">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setForumPostsList(forumPostsList.slice(5))}
-                  >
-                    Load More
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>

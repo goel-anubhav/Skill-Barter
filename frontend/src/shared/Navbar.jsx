@@ -9,7 +9,7 @@ import {
   Badge,
 } from "react-bootstrap";
 import { FaBars, FaBell } from "react-icons/fa";
-import { notifications as sampleNotifications } from "./notificationSample";
+import axios from "axios";
 
 const CustomNavbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -26,13 +26,20 @@ const CustomNavbar = () => {
       setIsLoggedIn(true);
       setUser(parsedUser);
       setProfilePicture(`http://localhost:8000${parsedUser.profile_picture}`);
-      fetchNotifications();
+      fetchNotifications(parsedUser.id);
     }
   }, []);
 
-  const fetchNotifications = async () => {
-    setNotifications(sampleNotifications);
-    setUnreadCount(sampleNotifications.filter((notif) => !notif.read).length);
+  const fetchNotifications = async (userId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/friends/notifications/${userId}/`
+      );
+      setNotifications(response.data);
+      setUnreadCount(response.data.filter((notif) => !notif.is_read).length);
+    } catch (error) {
+      console.error("Error fetching notifications", error);
+    }
   };
 
   const handleSignOut = () => {
@@ -45,11 +52,13 @@ const CustomNavbar = () => {
   const handleNotificationClick = async (notificationId) => {
     const updatedNotifications = notifications.map((notification) =>
       notification.id === notificationId
-        ? { ...notification, read: true }
+        ? { ...notification, is_read: true }
         : notification
     );
     setNotifications(updatedNotifications);
-    setUnreadCount(updatedNotifications.filter((notif) => !notif.read).length);
+    setUnreadCount(
+      updatedNotifications.filter((notif) => !notif.is_read).length
+    );
   };
 
   const handleClearAll = () => {
@@ -93,6 +102,13 @@ const CustomNavbar = () => {
             </Nav.Link>
             {isLoggedIn ? (
               <>
+                <Nav.Link
+                  as={Link}
+                  to="/sent-requests"
+                  className="font-weight-bold"
+                >
+                  Sent Requests
+                </Nav.Link>
                 <Dropdown align="end" className="mr-lg-3 mb-2 mb-lg-0">
                   <Dropdown.Toggle
                     as={Button}
@@ -157,9 +173,6 @@ const CustomNavbar = () => {
                   <Dropdown.Menu>
                     <Dropdown.Item onClick={() => navigate("/view-profile")}>
                       View Profile
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => navigate("/update-profile")}>
-                      Edit Profile
                     </Dropdown.Item>
                     <Dropdown.Item onClick={handleSignOut}>
                       Sign Out

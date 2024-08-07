@@ -1,70 +1,57 @@
 import React from "react";
+import { Container, Button, Row, Col } from "react-bootstrap";
 import {
-  MDBFooter,
-  MDBContainer,
-  MDBCol,
-  MDBRow,
-  MDBIcon,
-  MDBBtn,
-} from "mdb-react-ui-kit";
+  FaFacebookF,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedin,
+} from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <MDBFooter
+    <footer
       className="text-center text-white"
       style={{ backgroundColor: "#ffffff" }}
     >
-      <MDBContainer className="pt-4">
+      <Container className="pt-4">
         <section className="mb-4">
-          <MDBBtn
-            rippleColor="dark"
-            color="link"
-            floating
-            size="lg"
+          <Button
+            variant="link"
             className="text-dark m-1"
             href="#!"
             role="button"
           >
-            <MDBIcon fab className="fab fa-facebook-f" />
-          </MDBBtn>
+            <FaFacebookF />
+          </Button>
 
-          <MDBBtn
-            rippleColor="dark"
-            color="link"
-            floating
-            size="lg"
+          <Button
+            variant="link"
             className="text-dark m-1"
             href="#!"
             role="button"
           >
-            <MDBIcon fab className="fa-twitter" />
-          </MDBBtn>
+            <FaTwitter />
+          </Button>
 
-          <MDBBtn
-            rippleColor="dark"
-            color="link"
-            floating
-            size="lg"
+          <Button
+            variant="link"
             className="text-dark m-1"
             href="#!"
             role="button"
           >
-            <MDBIcon fab className="fa-instagram" />
-          </MDBBtn>
+            <FaInstagram />
+          </Button>
 
-          <MDBBtn
-            rippleColor="dark"
-            color="link"
-            floating
-            size="lg"
+          <Button
+            variant="link"
             className="text-dark m-1"
             href="#!"
             role="button"
           >
-            <MDBIcon fab className="fa-linkedin" />
-          </MDBBtn>
+            <FaLinkedin />
+          </Button>
         </section>
-      </MDBContainer>
+      </Container>
 
       <div
         className="text-center text-dark p-3"
@@ -79,7 +66,7 @@ const Footer = () => {
           Skill Barter
         </a>
       </div>
-    </MDBFooter>
+    </footer>
   );
 };
 
