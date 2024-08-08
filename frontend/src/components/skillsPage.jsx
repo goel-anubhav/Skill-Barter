@@ -1,10 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSpring, animated } from "react-spring";
+import { useNavigate } from "react-router-dom";
 import CustomNavbar from "../shared/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
 import { skillsOptions } from "../auth/skills"; // Import as named export
 
 const SkillsPage = () => {
+  const navigate = useNavigate();
+  const [profiles, setProfiles] = useState([]);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/users/");
+        setProfiles(response.data);
+      } catch (error) {
+        console.error("Error fetching profiles:", error);
+      }
+    };
+
+    fetchProfiles();
+  }, []);
+
   const springProps = useSpring({
     to: { opacity: 1, transform: "scale(1)" },
     from: { opacity: 0, transform: "scale(0.5)" },
@@ -12,11 +30,7 @@ const SkillsPage = () => {
   });
 
   const handleSkillClick = (skill) => {
-    const searchQuery = encodeURIComponent(skill);
-    window.open(
-      `https://www.google.com/search?q=about%20${searchQuery}`,
-      "_blank"
-    );
+    navigate("/skill-profile-view", { state: { searchType: "skill", searchTerm: skill, profiles } });
   };
 
   return (
@@ -76,7 +90,7 @@ const SkillsPage = () => {
                   {skill.charAt(0)}
                 </div>
                 <h3 style={{ color: "#343a40" }}>{skill}</h3>
-                <p style={{ color: "#6c757d" }}>Learn more about </p>
+                <p style={{ color: "#6c757d" }}>Learn more about {skill}</p>
               </animated.div>
             </div>
           ))}

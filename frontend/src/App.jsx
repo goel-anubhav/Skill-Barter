@@ -12,13 +12,14 @@ import Registration from "./auth/registration";
 import ConfirmationPage from "./components/confirmationPage";
 import Dashboard from "./components/dashboard";
 import FullProfileView from "./components/fullProfileView";
-import PublicProfileView from "./components/publicProfileView";
+import LocationProfileView from "./components/locationProfileView";
 import ViewProfile from "./shared/ViewProfile";
 import LoginProtectedRoute from "./auth/loginProtectedRoute";
 import NotFound from "./components/notFound";
 import SentRequests from "./components/sentRequests";
 import FriendRequests from "./shared/Request"; // Import FriendRequests component
 import AlreadyLoggedIn from "./auth/alreadyLoggedIn";
+import skillProfileView from "./components/skillProfileView";
 
 function App() {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -70,8 +71,12 @@ function App() {
               element={<LoginProtectedRoute element={Dashboard} />}
             />
             <Route
-              path="/profile-view"
-              element={<LoginProtectedRoute element={PublicProfileView} />}
+              path="/location-profile-view"
+              element={<LoginProtectedRoute element={LocationProfileView} />}
+            />
+              <Route
+              path="/skill-profile-view"
+              element={<LoginProtectedRoute element={skillProfileView} />}
             />
             <Route
               path="/full-profile-view"

@@ -8,7 +8,6 @@ import { Alert, Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const LocationFile = () => {
-  const [users, setUsers] = useState([]);
   const [locations, setLocations] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -42,21 +41,18 @@ const LocationFile = () => {
         const response = await axios.get(
           `http://localhost:8000/api/users/?state=${encodeURIComponent(state)}`
         );
-        const data = response.data;
+        const data = response.data.map((user) => ({
+          ...user,
+          skills: user.skills ? user.skills.split(", ") : [],
+          desired_skills: user.desired_skills ? user.desired_skills.split(", ") : [],
+          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${encodeURIComponent(user.email)}`,
+        }));
         if (data.length > 0) {
-          const formattedData = data.map((user) => ({
-            ...user,
-            skills: user.skills ? user.skills.split(", ") : [],
-            desiredSkills: user.desired_skills
-              ? user.desired_skills.split(", ")
-              : [],
-          }));
-          navigate("/profile-view", {
-            state: { users: formattedData, location: state },
+          navigate("/location-profile-view", {
+            state: { searchType: "location", searchTerm: state, profiles: data },
           });
           setShowAlert(false);
         } else {
-          setUsers([]);
           setAlertMessage(
             `No users found in ${state}. Be the first to sign up and barter your skills!`
           );
@@ -64,7 +60,6 @@ const LocationFile = () => {
         }
       } catch (error) {
         console.error("Error fetching users by state", error);
-        setUsers([]);
         setAlertMessage(
           "An error occurred while fetching user profiles. Please try again later."
         );

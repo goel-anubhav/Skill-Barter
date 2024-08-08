@@ -140,7 +140,7 @@ const Dashboard = () => {
 
   const handleSearchBySkill = () => {
     if (selectedSkill) {
-      navigate("/profile-view", {
+      navigate("/skill-profile-view", {
         state: { searchType: "skill", searchTerm: selectedSkill },
       });
     }
@@ -148,7 +148,7 @@ const Dashboard = () => {
 
   const handleSearchByLocation = () => {
     if (selectedLocation) {
-      navigate("/profile-view", {
+      navigate("/location-profile-view", {
         state: { searchType: "location", searchTerm: selectedLocation },
       });
     }
