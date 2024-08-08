@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "./states";
@@ -16,7 +16,7 @@ const years = Array.from({ length: 31 }, (_, i) => ({
 function Registration() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     full_name: "",
     email: "",
     phone_number: "",
@@ -26,12 +26,25 @@ function Registration() {
     desiredSkills: [],
     year_of_experience: null,
     qualification: null,
-  });
+  };
 
+  const [formData, setFormData] = useState(initialFormData);
   const [selectedFile1, setSelectedFile1] = useState(null);
   const [selectedFile2, setSelectedFile2] = useState(null);
   const [message, setMessage] = useState("");
   const [disabledFields, setDisabledFields] = useState(false);
+
+  useEffect(() => {
+    // Clear all local storage and session storage data
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Clear form data on component mount
+    setFormData(initialFormData);
+    setSelectedFile1(null);
+    setSelectedFile2(null);
+    setMessage("");
+  }, []);
 
   const handleChange = (name, value) => {
     setFormData((prevState) => ({

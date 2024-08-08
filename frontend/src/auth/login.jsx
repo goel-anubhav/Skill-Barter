@@ -189,7 +189,7 @@ function Login() {
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
           </Button>
-          <Button variant="primary" onClick={() => navigate("/signup")}>
+          <Button variant="primary" onClick={() => navigate("/registration")}>
             Go to Registration
           </Button>
         </Modal.Footer>
