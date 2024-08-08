@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
 import { Modal, Button, Spinner, Alert } from "react-bootstrap";
+import { FaExclamationTriangle, FaCheckCircle, FaKey } from "react-icons/fa";
 
 function SignupForm() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -23,7 +24,6 @@ function SignupForm() {
   const [alertMessage, setAlertMessage] = useState("");
   const [errorModal, setErrorModal] = useState(false);
   const [errorDetails, setErrorDetails] = useState("");
-  const [fieldErrors, setFieldErrors] = useState({});
   const navigate = useNavigate();
 
   const handleImageChange = (event) => {
@@ -36,9 +36,6 @@ function SignupForm() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
-    if (fieldErrors[name]) {
-      setFieldErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
-    }
   };
 
   const handleOtpChange = (event) => {
@@ -62,23 +59,27 @@ function SignupForm() {
       errors.phone_number = "Phone number must be exactly 10 digits.";
     }
 
-    if (
-      password &&
-      !passwordRegex.test(password)
-    ) {
+    if (password && !passwordRegex.test(password)) {
       errors.password =
         "Password must contain at least one capital letter, one number, one special character, and be at least 8 characters long.";
     }
 
-    setFieldErrors(errors);
-
-    return Object.keys(errors).length === 0;
+    return errors;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!validateForm()) {
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      let errorMessages = "";
+      for (const key in errors) {
+        if (errors.hasOwnProperty(key)) {
+          errorMessages += `${errors[key]}\n`;
+        }
+      }
+      setErrorDetails(errorMessages);
+      setErrorModal(true);
       return;
     }
 
@@ -188,9 +189,7 @@ function SignupForm() {
               </label>
               <input
                 type="text"
-                className={`form-control ${
-                  fieldErrors.full_name ? "is-invalid" : ""
-                }`}
+                className="form-control"
                 id="full_name"
                 name="full_name"
                 placeholder="Enter your full name"
@@ -199,9 +198,6 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
-              {fieldErrors.full_name && (
-                <div className="invalid-feedback">{fieldErrors.full_name}</div>
-              )}
             </div>
             <div className="form-group">
               <label htmlFor="email" className="font-weight-bold">
@@ -209,9 +205,7 @@ function SignupForm() {
               </label>
               <input
                 type="email"
-                className={`form-control ${
-                  fieldErrors.email ? "is-invalid" : ""
-                }`}
+                className="form-control"
                 id="email"
                 name="email"
                 placeholder="Enter your email"
@@ -220,9 +214,6 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
-              {fieldErrors.email && (
-                <div className="invalid-feedback">{fieldErrors.email}</div>
-              )}
             </div>
             <div className="form-group">
               <label htmlFor="phone_number" className="font-weight-bold">
@@ -230,9 +221,7 @@ function SignupForm() {
               </label>
               <input
                 type="text"
-                className={`form-control ${
-                  fieldErrors.phone_number ? "is-invalid" : ""
-                }`}
+                className="form-control"
                 id="phone_number"
                 name="phone_number"
                 placeholder="Enter your phone number"
@@ -241,11 +230,6 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
-              {fieldErrors.phone_number && (
-                <div className="invalid-feedback">
-                  {fieldErrors.phone_number}
-                </div>
-              )}
             </div>
             <div className="form-group">
               <label htmlFor="password" className="font-weight-bold">
@@ -253,9 +237,7 @@ function SignupForm() {
               </label>
               <input
                 type="password"
-                className={`form-control ${
-                  fieldErrors.password ? "is-invalid" : ""
-                }`}
+                className="form-control"
                 id="password"
                 name="password"
                 placeholder="Enter your password"
@@ -264,9 +246,6 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
-              {fieldErrors.password && (
-                <div className="invalid-feedback">{fieldErrors.password}</div>
-              )}
               <small className="form-text text-muted">
                 Password must contain at least one capital letter, one number,
                 one special character, and be at least 8 characters long.
@@ -334,9 +313,12 @@ function SignupForm() {
         </div>
       </div>
 
-      <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>OTP Verification</Modal.Title>
+      <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)} centered>
+        <Modal.Header closeButton className="bg-primary text-white">
+          <Modal.Title>
+            <FaKey className="mr-2" />
+            OTP Verification
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="form-group">
@@ -369,7 +351,7 @@ function SignupForm() {
             </span>
           </div>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="d-flex justify-content-between">
           <Button variant="secondary" onClick={() => setShowOtpModal(false)}>
             Cancel
           </Button>
@@ -389,14 +371,19 @@ function SignupForm() {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={errorModal} onHide={() => setErrorModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Signup Error</Modal.Title>
+      <Modal show={errorModal} onHide={() => setErrorModal(false)} centered>
+        <Modal.Header closeButton className="bg-danger text-white">
+          <Modal.Title>
+            <FaExclamationTriangle className="mr-2" />
+            Signup Error
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <pre>{errorDetails}</pre>
+          <Alert variant="danger">
+            <pre>{errorDetails}</pre>
+          </Alert>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="d-flex justify-content-between">
           <Button variant="secondary" onClick={() => setErrorModal(false)}>
             Close
           </Button>
