@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [selectedDesiredSkills, setSelectedDesiredSkills] = useState([]);
   const [forumPostsList, setForumPostsList] = useState([]);
   const [skillsOptions, setSkillsOptions] = useState([]);
-  const [citiesOptions, setCitiesOptions] = useState([]);
+  const [statesOptions, setStatesOptions] = useState([]);
   const skillsRef = useRef(null);
   const locationsRef = useRef(null);
   const forumRef = useRef(null);
@@ -27,7 +27,7 @@ const Dashboard = () => {
         const data = response.data;
 
         const skills = new Set();
-        const cities = new Set();
+        const states = new Set();
         const formattedData = data.map((user) => {
           const emailEncoded = user.email.replace("@", "%40");
           const profilePictureURL = `http://127.0.0.1:8000/api/users/profile-picture/${emailEncoded}/`;
@@ -49,23 +49,23 @@ const Dashboard = () => {
             );
 
           skills.add(user.skills);
-          cities.add(user.city);
+          states.add(user.state);
           return {
             id: user.id,
             name: user.full_name,
             location: `${user.city}, ${user.state}`,
-            email: user.email, // Ensure the email is included in the profile data
+            email: user.email,
             skills: user.skills ? user.skills.split(", ") : [],
             desiredSkills: user.desired_skills
               ? user.desired_skills.split(", ")
               : [],
-            rating: "4.5", // Assuming a default rating as the API does not provide it
+            rating: "4.5",
             img: "", // Placeholder until the image is fetched
             message: `Looking to exchange ${user.skills} skills for ${user.desired_skills} knowledge.`,
           };
         });
         setSkillsOptions([...skills]);
-        setCitiesOptions([...cities]);
+        setStatesOptions([...states]);
         setForumPostsList(formattedData.filter((post) => post.id !== user.id)); // Exclude the logged-in user's own post
       } catch (error) {
         console.error("Error fetching data", error);
@@ -114,43 +114,41 @@ const Dashboard = () => {
     setSelectedDesiredSkills(selectedValues);
   };
 
-  const handleForumSubmit = (e) => {
-    e.preventDefault();
-    const topic = e.target.forumTopic.value;
-    const message = e.target.forumMessage.value;
-
-    if (topic && message) {
-      setForumPostsList([
-        ...forumPostsList,
-        {
-          id: forumPostsList.length + 1,
-          name: topic,
-          location: "Unknown",
-          skills: ["Skill1", "Skill2"],
-          desiredSkills: selectedDesiredSkills,
-          rating: "4.5",
-          img: "https://via.placeholder.com/150",
-          message,
-        },
-      ]);
-      e.target.reset();
-      setSelectedDesiredSkills([]);
-    }
-  };
-
-  const handleSearchBySkill = () => {
+  const handleSearchBySkill = async () => {
     if (selectedSkill) {
-      navigate("/skill-profile-view", {
-        state: { searchType: "skill", searchTerm: selectedSkill },
-      });
+      try {
+        const response = await axios.get(`http://localhost:8000/api/users/?skill=${encodeURIComponent(selectedSkill)}`);
+        const data = response.data.map((user) => ({
+          ...user,
+          skills: user.skills ? user.skills.split(", ") : [],
+          desired_skills: user.desired_skills ? user.desired_skills.split(", ") : [],
+          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${user.email.replace("@", "%40")}/`,
+        }));
+        navigate("/skill-profile-view", {
+          state: { searchType: "skill", searchTerm: selectedSkill, profiles: data },
+        });
+      } catch (error) {
+        console.error("Error fetching users by skill", error);
+      }
     }
   };
 
-  const handleSearchByLocation = () => {
+  const handleSearchByLocation = async () => {
     if (selectedLocation) {
-      navigate("/location-profile-view", {
-        state: { searchType: "location", searchTerm: selectedLocation },
-      });
+      try {
+        const response = await axios.get(`http://localhost:8000/api/users/?state=${encodeURIComponent(selectedLocation)}`);
+        const data = response.data.map((user) => ({
+          ...user,
+          skills: user.skills ? user.skills.split(", ") : [],
+          desired_skills: user.desired_skills ? user.desired_skills.split(", ") : [],
+          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${user.email.replace("@", "%40")}/`,
+        }));
+        navigate("/location-profile-view", {
+          state: { searchType: "location", searchTerm: selectedLocation, profiles: data },
+        });
+      } catch (error) {
+        console.error("Error fetching users by location", error);
+      }
     }
   };
 
@@ -191,7 +189,7 @@ const Dashboard = () => {
           <span style={{ color: "black" }}>Skill</span>
           <span style={{ color: "#F83002" }}>Barter</span>
           <span style={{ color: "black" }}>.in</span>
-        </h1>
+        </h1        >
         <p
           className="lead"
           style={{
@@ -292,7 +290,7 @@ const Dashboard = () => {
             <p>Find barter opportunities based on your location.</p>
             <form>
               <div className="form-group">
-                <label htmlFor="locationInput">Select Location</label>
+                <label htmlFor="locationInput">Select State</label>
                 <select
                   className="form-control"
                   id="locationInput"
@@ -301,11 +299,11 @@ const Dashboard = () => {
                   style={{ maxWidth: "100%", width: "100%" }}
                 >
                   <option value="" disabled>
-                    Select a location
+                    Select a state
                   </option>
-                  {citiesOptions.map((city, index) => (
-                    <option key={index} value={city}>
-                      {city}
+                  {statesOptions.map((state, index) => (
+                    <option key={index} value={state}>
+                      {state}
                     </option>
                   ))}
                 </select>
