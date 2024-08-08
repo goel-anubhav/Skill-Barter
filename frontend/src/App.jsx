@@ -1,5 +1,3 @@
-// src/App.js
-
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -19,6 +17,7 @@ import ViewProfile from "./shared/ViewProfile";
 import LoginProtectedRoute from "./auth/loginProtectedRoute";
 import NotFound from "./components/notFound";
 import SentRequests from "./components/sentRequests";
+import FriendRequests from "./shared/Request"; // Import FriendRequests component
 import AlreadyLoggedIn from "./auth/alreadyLoggedIn";
 
 function App() {
@@ -85,6 +84,10 @@ function App() {
             <Route
               path="/sent-requests"
               element={<LoginProtectedRoute element={SentRequests} />}
+            />
+            <Route
+              path="/friend-requests"
+              element={<LoginProtectedRoute element={FriendRequests} />}
             />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -21,6 +21,9 @@ function SignupForm() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("danger");
   const [alertMessage, setAlertMessage] = useState("");
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorDetails, setErrorDetails] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const navigate = useNavigate();
 
   const handleImageChange = (event) => {
@@ -33,6 +36,9 @@ function SignupForm() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+    }
   };
 
   const handleOtpChange = (event) => {
@@ -45,27 +51,28 @@ function SignupForm() {
       /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     const phoneRegex = /^\d{10}$/;
 
-    if (!full_name || !email || !phone_number || !password) {
-      setAlertMessage("Please fill all the fields.");
-      setAlertVariant("danger");
-      setShowAlert(true);
-      return false;
+    let errors = {};
+
+    if (!full_name) errors.full_name = "Full name is required.";
+    if (!email) errors.email = "Email is required.";
+    if (!phone_number) errors.phone_number = "Phone number is required.";
+    if (!password) errors.password = "Password is required.";
+
+    if (phone_number && !phoneRegex.test(phone_number)) {
+      errors.phone_number = "Phone number must be exactly 10 digits.";
     }
-    if (!phoneRegex.test(phone_number)) {
-      setAlertMessage("Phone number must be exactly 10 digits.");
-      setAlertVariant("danger");
-      setShowAlert(true);
-      return false;
+
+    if (
+      password &&
+      !passwordRegex.test(password)
+    ) {
+      errors.password =
+        "Password must contain at least one capital letter, one number, one special character, and be at least 8 characters long.";
     }
-    if (!passwordRegex.test(password)) {
-      setAlertMessage(
-        "Password must contain at least one capital letter, one number, one special character, and be at least 8 characters long."
-      );
-      setAlertVariant("danger");
-      setShowAlert(true);
-      return false;
-    }
-    return true;
+
+    setFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (event) => {
@@ -99,9 +106,21 @@ function SignupForm() {
       setMessage("Signup successful! Please enter the OTP sent to your email.");
       setShowOtpModal(true);
     } catch (error) {
-      setAlertMessage("Error during signup");
-      setAlertVariant("danger");
-      setShowAlert(true);
+      if (error.response && error.response.data) {
+        const errors = error.response.data;
+        let errorMessages = "";
+        for (const key in errors) {
+          if (errors.hasOwnProperty(key)) {
+            errorMessages += `${key}: ${errors[key]}\n`;
+          }
+        }
+        setErrorDetails(errorMessages);
+        setErrorModal(true);
+      } else {
+        setAlertMessage("Error during signup");
+        setAlertVariant("danger");
+        setShowAlert(true);
+      }
       console.error(
         "Signup error:",
         error.response ? error.response.data : error.message
@@ -169,7 +188,9 @@ function SignupForm() {
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={`form-control ${
+                  fieldErrors.full_name ? "is-invalid" : ""
+                }`}
                 id="full_name"
                 name="full_name"
                 placeholder="Enter your full name"
@@ -178,6 +199,9 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.full_name && (
+                <div className="invalid-feedback">{fieldErrors.full_name}</div>
+              )}
             </div>
             <div className="form-group">
               <label htmlFor="email" className="font-weight-bold">
@@ -185,7 +209,9 @@ function SignupForm() {
               </label>
               <input
                 type="email"
-                className="form-control"
+                className={`form-control ${
+                  fieldErrors.email ? "is-invalid" : ""
+                }`}
                 id="email"
                 name="email"
                 placeholder="Enter your email"
@@ -194,6 +220,9 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.email && (
+                <div className="invalid-feedback">{fieldErrors.email}</div>
+              )}
             </div>
             <div className="form-group">
               <label htmlFor="phone_number" className="font-weight-bold">
@@ -201,7 +230,9 @@ function SignupForm() {
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={`form-control ${
+                  fieldErrors.phone_number ? "is-invalid" : ""
+                }`}
                 id="phone_number"
                 name="phone_number"
                 placeholder="Enter your phone number"
@@ -210,6 +241,11 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.phone_number && (
+                <div className="invalid-feedback">
+                  {fieldErrors.phone_number}
+                </div>
+              )}
             </div>
             <div className="form-group">
               <label htmlFor="password" className="font-weight-bold">
@@ -217,7 +253,9 @@ function SignupForm() {
               </label>
               <input
                 type="password"
-                className="form-control"
+                className={`form-control ${
+                  fieldErrors.password ? "is-invalid" : ""
+                }`}
                 id="password"
                 name="password"
                 placeholder="Enter your password"
@@ -226,6 +264,9 @@ function SignupForm() {
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.password && (
+                <div className="invalid-feedback">{fieldErrors.password}</div>
+              )}
               <small className="form-text text-muted">
                 Password must contain at least one capital letter, one number,
                 one special character, and be at least 8 characters long.
@@ -344,6 +385,20 @@ function SignupForm() {
             ) : (
               "Verify OTP"
             )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={errorModal} onHide={() => setErrorModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Signup Error</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <pre>{errorDetails}</pre>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setErrorModal(false)}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

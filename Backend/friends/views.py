@@ -41,21 +41,30 @@ def list_requests(request, receiver_email):
 def respond_request(request, request_id):
     try:
         friend_request = FriendRequest.objects.get(id=request_id)
-    except FriendRequest.DoesNotExist:
-        return Response({'error': 'Friend request does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    response_status = request.data.get('status')
-    if response_status not in ['accepted', 'declined']:
-        return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Ensure only the receiver can respond to the request
-    if friend_request.receiver_email != request.data.get('receiver'):
-        return Response({'error': 'Only the receiver can respond to this request'}, status=status.HTTP_403_FORBIDDEN)
-    
-    friend_request.status = response_status
-    friend_request.save()
-    return Response({'success': f'Friend request {response_status}'}, status=status.HTTP_200_OK)
+        status = request.data.get('status')
+        receiver_email = request.data.get('receiver')
 
+        if status not in ['accepted', 'declined']:
+            return Response({'error': 'Invalid status'}, status=400)
+
+        if friend_request.receiver_email != receiver_email:
+            return Response({'error': 'You are not authorized to respond to this request'}, status=403)
+
+        friend_request.status = status
+        friend_request.save()
+
+        if status == 'accepted':
+            sender = friend_request.sender
+            notification_message = f"Your friend request to {receiver_email} has been accepted."
+            Notification.objects.create(user=sender, message=notification_message)
+
+        return Response({'success': f'Request {status}'}, status=200)
+
+    except FriendRequest.DoesNotExist:
+        return Response({'error': 'Friend request not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
 @api_view(['GET'])
 def list_notifications(request, user_id):
     try:

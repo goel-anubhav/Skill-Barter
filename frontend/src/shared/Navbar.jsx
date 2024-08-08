@@ -7,6 +7,7 @@ import {
   Container,
   Dropdown,
   Badge,
+  Form,
 } from "react-bootstrap";
 import { FaBars, FaBell } from "react-icons/fa";
 import axios from "axios";
@@ -27,6 +28,9 @@ const CustomNavbar = () => {
       setUser(parsedUser);
       setProfilePicture(`http://localhost:8000${parsedUser.profile_picture}`);
       fetchNotifications(parsedUser.id);
+    } else {
+      setIsLoggedIn(false);
+      setUser(null);
     }
   }, []);
 
@@ -46,19 +50,29 @@ const CustomNavbar = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setIsLoggedIn(false);
+    setUser(null);
     navigate("/login");
   };
 
-  const handleNotificationClick = async (notificationId) => {
-    const updatedNotifications = notifications.map((notification) =>
-      notification.id === notificationId
-        ? { ...notification, is_read: true }
-        : notification
-    );
-    setNotifications(updatedNotifications);
-    setUnreadCount(
-      updatedNotifications.filter((notif) => !notif.is_read).length
-    );
+  const handleNotificationRead = async (notificationId) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/api/friends/notifications/read/${notificationId}/`
+      );
+      if (response.data.success) {
+        const updatedNotifications = notifications.map((notification) =>
+          notification.id === notificationId
+            ? { ...notification, is_read: true }
+            : notification
+        );
+        setNotifications(updatedNotifications);
+        setUnreadCount(
+          updatedNotifications.filter((notif) => !notif.is_read).length
+        );
+      }
+    } catch (error) {
+      console.error("Error marking notification as read", error);
+    }
   };
 
   const handleClearAll = () => {
@@ -109,6 +123,13 @@ const CustomNavbar = () => {
                 >
                   Sent Requests
                 </Nav.Link>
+                <Nav.Link
+                  as={Link}
+                  to="/friend-requests"
+                  className="font-weight-bold"
+                >
+                  Friend Requests
+                </Nav.Link>
                 <Dropdown align="end" className="mr-lg-3 mb-2 mb-lg-0">
                   <Dropdown.Toggle
                     as={Button}
@@ -126,7 +147,7 @@ const CustomNavbar = () => {
                       </Badge>
                     )}
                   </Dropdown.Toggle>
-                  <Dropdown.Menu style={{ minWidth: "250px" }}>
+                  <Dropdown.Menu style={{ minWidth: "300px" }}>
                     <div className="d-flex justify-content-between align-items-center px-3">
                       <span>Notifications</span>
                       <Button variant="link" size="sm" onClick={handleClearAll}>
@@ -138,11 +159,27 @@ const CustomNavbar = () => {
                       notifications.map((notification) => (
                         <Dropdown.Item
                           key={notification.id}
-                          onClick={() =>
-                            handleNotificationClick(notification.id)
-                          }
+                          className="d-flex align-items-center"
                         >
-                          {notification.message}
+                          <Form.Check
+                            type="checkbox"
+                            checked={notification.is_read}
+                            onChange={() =>
+                              handleNotificationRead(notification.id)
+                            }
+                            className="mr-2"
+                            style={{
+                              accentColor: notification.is_read
+                                ? "blue"
+                                : "initial",
+                            }}
+                          />
+                          <div className="d-flex flex-column">
+                            <span>{notification.message}</span>
+                            {!notification.is_read && (
+                              <small className="text-muted">Mark as read</small>
+                            )}
+                          </div>
                         </Dropdown.Item>
                       ))
                     ) : (

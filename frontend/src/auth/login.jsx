@@ -3,17 +3,44 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Alert } from "react-bootstrap";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertVariant, setAlertVariant] = useState("danger");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const navigate = useNavigate();
+
+  const validateForm = () => {
+    let errors = {};
+    let isValid = true;
+
+    if (!email) {
+      errors.email = "Email is required.";
+      isValid = false;
+    }
+
+    if (!password) {
+      errors.password = "Password is required.";
+      isValid = false;
+    }
+
+    setFieldErrors(errors);
+    return isValid;
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       // First, check if the user exists and is approved
       const usersResponse = await axios.get("http://localhost:8000/api/users/");
@@ -50,8 +77,26 @@ function Login() {
         navigate("/dashboard"); // Redirect to a dashboard or homepage after login
       }
     } catch (error) {
-      setMessage("Error during login");
-      console.error(error.response ? error.response.data : error.message);
+      if (error.response && error.response.data) {
+        const errors = error.response.data;
+        let errorMessages = "";
+        for (const key in errors) {
+          if (errors.hasOwnProperty(key)) {
+            errorMessages += `${key}: ${errors[key]}\n`;
+          }
+        }
+        setAlertMessage(errorMessages);
+        setAlertVariant("danger");
+        setShowAlert(true);
+      } else {
+        setAlertMessage("Error during login");
+        setAlertVariant("danger");
+        setShowAlert(true);
+      }
+      console.error(
+        "Login error:",
+        error.response ? error.response.data : error.message
+      );
     }
   };
 
@@ -71,6 +116,15 @@ function Login() {
       >
         <div className="card p-4" style={{ maxWidth: "600px", width: "100%" }}>
           <h2 className="mb-4">Login</h2>
+          {showAlert && (
+            <Alert
+              variant={alertVariant}
+              onClose={() => setShowAlert(false)}
+              dismissible
+            >
+              {alertMessage}
+            </Alert>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="form-group mb-3">
               <label htmlFor="email" className="form-label">
@@ -78,7 +132,9 @@ function Login() {
               </label>
               <input
                 type="email"
-                className="form-control"
+                className={`form-control ${
+                  fieldErrors.email ? "is-invalid" : ""
+                }`}
                 id="email"
                 placeholder="Enter a valid Email Address"
                 autoComplete="off"
@@ -86,6 +142,9 @@ function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+              {fieldErrors.email && (
+                <div className="invalid-feedback">{fieldErrors.email}</div>
+              )}
             </div>
             <div className="form-group mb-3">
               <label htmlFor="password" className="form-label">
@@ -93,7 +152,9 @@ function Login() {
               </label>
               <input
                 type="password"
-                className="form-control"
+                className={`form-control ${
+                  fieldErrors.password ? "is-invalid" : ""
+                }`}
                 id="password"
                 placeholder="Enter a Strong Password"
                 autoComplete="off"
@@ -101,6 +162,9 @@ function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              {fieldErrors.password && (
+                <div className="invalid-feedback">{fieldErrors.password}</div>
+              )}
             </div>
             <button type="submit" className="btn btn-primary btn-block w-100">
               Login
