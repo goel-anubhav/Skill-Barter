@@ -21,17 +21,28 @@ const CustomNavbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setIsLoggedIn(true);
-      setUser(parsedUser);
-      setProfilePicture(`http://localhost:8000${parsedUser.profile_picture}`);
-      fetchNotifications(parsedUser.id);
-    } else {
-      setIsLoggedIn(false);
-      setUser(null);
-    }
+    const checkLoginStatus = () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setIsLoggedIn(true);
+        setUser(parsedUser);
+        setProfilePicture(`http://localhost:8000${parsedUser.profile_picture}`);
+        fetchNotifications(parsedUser.id);
+      } else {
+        setIsLoggedIn(false);
+        setUser(null);
+      }
+    };
+
+    checkLoginStatus();
+
+    // Re-check login status on page focus to handle logout from other tabs
+    window.addEventListener("focus", checkLoginStatus);
+
+    return () => {
+      window.removeEventListener("focus", checkLoginStatus);
+    };
   }, []);
 
   const fetchNotifications = async (userId) => {
