@@ -1,4 +1,12 @@
 /frontend/node_modules
-/backend/env
-/backend/media/profile_pictures
-/backend/profile_pictures
+/Backend/env
+# /Backend/media/profile_pictures
+# /Backend/profile_pictures
+/Backend/friends/__pycache__
+/Backend/friends/migrations
+/Backend/myproject/__pycache__
+/Backend/Registration/__pycache__
+/Backend/Registration/migrations
+/Backend/users/__pycache__
+/Backend/users/migrations
+/Backend/db.sqlite3
