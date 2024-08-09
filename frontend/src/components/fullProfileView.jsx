@@ -17,6 +17,9 @@ const FullProfileView = () => {
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [profilePicture, setProfilePicture] = useState("");
+  const defaultImage = "https://via.placeholder.com/150"; // Placeholder image URL
+  const baseURL = "http://127.0.0.1:8000"; // Base URL for your API
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -32,6 +35,25 @@ const FullProfileView = () => {
   useEffect(() => {
     if (profile) {
       console.log("Profile being viewed email:", profile.email);
+
+      // Fetch the profile picture
+      const fetchProfilePicture = async () => {
+        try {
+          const encodedEmail = encodeURIComponent(profile.email); // Encode the email to handle '@'
+          const response = await axios.get(`${baseURL}/api/users/profile-picture/${encodedEmail}/`);
+          const imageUrl = response.data.profile_picture
+            ? `${baseURL}${response.data.profile_picture}`
+            : defaultImage;
+          setProfilePicture(imageUrl);
+        } catch (error) {
+          console.error("Error fetching profile picture", error);
+          setProfilePicture(defaultImage);
+        }
+      };
+
+      fetchProfilePicture();
+
+      // Check if there is a pending request for the user
       const checkPendingRequest = async () => {
         try {
           const response = await axios.get(
@@ -166,7 +188,7 @@ const FullProfileView = () => {
           >
             <Card.Img
               variant="top"
-              src={profile.profile_picture || "default-image.jpg"}
+              src={profilePicture || defaultImage}
               style={{ height: "300px", objectFit: "cover" }}
             />
             <Card.Body style={{ textAlign: "left" }}>
@@ -177,11 +199,16 @@ const FullProfileView = () => {
                 <strong>Location:</strong> {profile.city}, {profile.state}
               </Card.Text>
               <Card.Text>
-                <strong>Skills:</strong> {Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills}
+                <strong>Skills:</strong>{" "}
+                {Array.isArray(profile.skills)
+                  ? profile.skills.join(", ")
+                  : profile.skills}
               </Card.Text>
               <Card.Text>
                 <strong>Desired Skills:</strong>{" "}
-                {Array.isArray(profile.desired_skills) ? profile.desired_skills.join(", ") : profile.desired_skills}
+                {Array.isArray(profile.desired_skills)
+                  ? profile.desired_skills.join(", ")
+                  : profile.desired_skills}
               </Card.Text>
               <Card.Text>
                 <strong>Rating:</strong> {profile.rating}

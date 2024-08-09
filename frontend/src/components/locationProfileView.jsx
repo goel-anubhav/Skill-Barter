@@ -10,7 +10,7 @@ const LocationProfileView = () => {
   const navigate = useNavigate();
   const { searchType, searchTerm, profiles } = location.state || {};
   const [filteredProfiles, setFilteredProfiles] = useState(profiles);
-  const [filterOption, setFilterOption] = useState("");
+  const [filterOptions, setFilterOptions] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,25 +21,55 @@ const LocationProfileView = () => {
     let filtered;
     if (type === "skill") {
       filtered = profiles.filter((profile) =>
-        profile.skills.includes(term)
+        Array.isArray(profile.skills)
+          ? profile.skills.includes(term)
+          : profile.skills.split(", ").includes(term)
       );
     } else {
-      filtered = profiles.filter((profile) =>
-        profile.state === term
-      );
+      filtered = profiles.filter((profile) => profile.state === term);
     }
     setFilteredProfiles(filtered);
+    updateFilterOptions(filtered, type);
+  };
+
+  const updateFilterOptions = (filteredProfiles, type) => {
+    let options;
+    if (type === "skill") {
+      options = [...new Set(filteredProfiles.map((profile) => profile.state))];
+    } else {
+      options = [
+        ...new Set(
+          filteredProfiles.flatMap((profile) =>
+            Array.isArray(profile.skills)
+              ? profile.skills
+              : profile.skills.split(", ")
+          )
+        ),
+      ];
+    }
+    setFilterOptions(options);
   };
 
   const handleFilter = (option) => {
-    setFilterOption(option);
     if (searchType === "skill") {
       setFilteredProfiles(
-        profiles.filter((profile) => profile.state === option)
+        profiles.filter(
+          (profile) =>
+            profile.state === option &&
+            (Array.isArray(profile.skills)
+              ? profile.skills.includes(searchTerm)
+              : profile.skills.split(", ").includes(searchTerm))
+        )
       );
     } else {
       setFilteredProfiles(
-        profiles.filter((profile) => profile.skills.includes(option))
+        profiles.filter(
+          (profile) =>
+            (Array.isArray(profile.skills)
+              ? profile.skills.includes(option)
+              : profile.skills.split(", ").includes(option)) &&
+            profile.state === searchTerm
+        )
       );
     }
   };
@@ -86,19 +116,11 @@ const LocationProfileView = () => {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-              {(searchType === "skill"
-                ? profiles.map((profile) => profile.state)
-                : profiles.flatMap((profile) => profile.skills || [])
-              )
-                .filter((value, index, self) => self.indexOf(value) === index) // unique values
-                .map((option, index) => (
-                  <Dropdown.Item
-                    key={index}
-                    onClick={() => handleFilter(option)}
-                  >
-                    {option}
-                  </Dropdown.Item>
-                ))}
+              {filterOptions.map((option, index) => (
+                <Dropdown.Item key={index} onClick={() => handleFilter(option)}>
+                  {option}
+                </Dropdown.Item>
+              ))}
             </Dropdown.Menu>
           </Dropdown>
         </div>
@@ -106,30 +128,6 @@ const LocationProfileView = () => {
           {filteredProfiles.map((profile) => (
             <Col md={6} lg={4} key={profile.id} className="mb-4">
               <CardComponent profile={profile} />
-              {/* <Button
-                variant="primary"
-                onClick={() => handleViewProfile(profile)}
-                style={{
-                  backgroundColor: "#F83002",
-                  border: "none",
-                  borderRadius: "20px",
-                  padding: "10px 20px",
-                  fontWeight: "bold",
-                  marginTop: "10px",
-                  color: "white",
-                  transition: "background-color 0.3s ease",
-                  marginBottom: "20px",
-                  fontFamily: "Arial, sans-serif",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#6A38C2")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#F83002")
-                }
-              >
-                View Profile
-              </Button> */}
             </Col>
           ))}
         </Row>

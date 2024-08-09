@@ -1,27 +1,49 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Card, Button } from "react-bootstrap";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useState, useEffect } from "react";
 
 const CardComponent = ({ profile }) => {
   const navigate = useNavigate();
   const [profilePicture, setProfilePicture] = useState("");
+  const defaultImage = "https://via.placeholder.com/150"; // Placeholder image URL
+  const baseURL = "http://127.0.0.1:8000"; // Base URL for your API
 
   useEffect(() => {
     const fetchProfilePicture = async () => {
       try {
-        const response = await axios.get(profile.profile_picture);
-        setProfilePicture(response.data.profile_picture);
+        const encodedEmail = encodeURIComponent(profile.email); // Encode the email to handle '@'
+        const response = await axios.get(`${baseURL}/api/users/profile-picture/${encodedEmail}/`);
+        const imageUrl = response.data.profile_picture
+          ? `${baseURL}${response.data.profile_picture}`
+          : defaultImage;
+        setProfilePicture(imageUrl);
       } catch (error) {
         console.error("Error fetching profile picture", error);
+        setProfilePicture(defaultImage);
       }
     };
 
     fetchProfilePicture();
-  }, [profile.profile_picture]);
+  }, [profile.email]);
 
-  const skills = Array.isArray(profile.skills) ? profile.skills : [profile.skills];
-  const desiredSkills = Array.isArray(profile.desired_skills) ? profile.desired_skills : [profile.desired_skills];
+  // Ensure that profile.skills is treated as an array
+  const skills = Array.isArray(profile.skills)
+    ? profile.skills
+    : typeof profile.skills === 'string'
+      ? profile.skills.split(", ")
+      : [];
+
+  const desiredSkills = Array.isArray(profile.desired_skills)
+    ? profile.desired_skills
+    : typeof profile.desired_skills === 'string'
+      ? profile.desired_skills.split(", ")
+      : [];
+
+  const handleViewProfile = () => {
+    navigate("/full-profile-view", { state: { profile } });
+  };
 
   return (
     <Card
@@ -35,7 +57,7 @@ const CardComponent = ({ profile }) => {
     >
       <Card.Img
         variant="top"
-        src={profilePicture ? profilePicture : "default-image.jpg"}
+        src={profilePicture || defaultImage}
         alt={profile.full_name}
         style={{ height: "150px", objectFit: "cover" }}
       />
@@ -68,7 +90,7 @@ const CardComponent = ({ profile }) => {
         </Card.Text>
         <Button
           variant="primary"
-          onClick={() => navigate("/full-profile-view", { state: { profile } })}
+          onClick={handleViewProfile}
           style={{
             backgroundColor: "#6A38C2",
             border: "none",
