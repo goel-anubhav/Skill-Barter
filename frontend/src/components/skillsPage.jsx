@@ -30,7 +30,22 @@ const SkillsPage = () => {
   });
 
   const handleSkillClick = (skill) => {
-    navigate("/skill-profile-view", { state: { searchType: "skill", searchTerm: skill, profiles } });
+    const skillProfiles = profiles.filter((profile) => {
+      if (Array.isArray(profile.skills)) {
+        return profile.skills.includes(skill);
+      } else if (profile.skills) {
+        return profile.skills.split(", ").includes(skill);
+      }
+      return false;
+    });
+
+    if (skillProfiles.length > 0) {
+      navigate("/skill-profile-view", {
+        state: { searchType: "skill", searchTerm: skill, profiles: skillProfiles },
+      });
+    } else {
+      alert(`No users found with the skill: ${skill}`);
+    }
   };
 
   return (

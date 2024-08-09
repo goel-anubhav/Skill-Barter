@@ -27,9 +27,7 @@ const SkillProfileView = () => {
           : profile.skills.split(", ").includes(term)
       );
     } else {
-      filtered = profiles.filter((profile) =>
-        profile.state === term
-      );
+      filtered = profiles.filter((profile) => profile.state === term);
     }
     setFilteredProfiles(filtered);
     if (filtered.length === 0) {
@@ -40,11 +38,7 @@ const SkillProfileView = () => {
   const handleFilter = (option) => {
     setFilterOption(option);
     if (searchType === "skill") {
-      setFilteredProfiles(
-        profiles.filter((profile) =>
-          profile.state === option
-        )
-      );
+      setFilteredProfiles(profiles.filter((profile) => profile.state === option));
     } else {
       setFilteredProfiles(
         profiles.filter((profile) =>
@@ -122,7 +116,7 @@ const SkillProfileView = () => {
           {filteredProfiles.map((profile) => (
             <Col md={6} lg={4} key={profile.id} className="mb-4">
               <CardComponent profile={profile} />
-              <Button
+              {/* <Button
                 variant="primary"
                 onClick={() => handleViewProfile(profile)}
                 style={{
@@ -145,7 +139,7 @@ const SkillProfileView = () => {
                 }
               >
                 View Profile
-              </Button>
+              </Button> */}
             </Col>
           ))}
         </Row>
@@ -166,11 +160,9 @@ const SkillProfileView = () => {
               fontFamily: "Arial, sans-serif",
             }}
             onMouseOver={(e) =>
-              (e.currentTarget.style.backgroundColor = "#F83002")
-            }
+              (e.currentTarget.style.backgroundColor = "#F83002")}
             onMouseOut={(e) =>
-              (e.currentTarget.style.backgroundColor = "#6A38C2")
-            }
+              (e.currentTarget.style.backgroundColor = "#6A38C2")}
           >
             Search Again
           </Button>

@@ -25,14 +25,13 @@ const FullProfileView = () => {
     } else {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
-      console.log("Logged-in user email:", parsedUser.email); // Log user email
+      console.log("Logged-in user email:", parsedUser.email);
     }
   }, [navigate]);
 
   useEffect(() => {
     if (profile) {
-      console.log("Profile being viewed email:", profile.email); // Log profile email
-      // Check if there is a pending request for the user
+      console.log("Profile being viewed email:", profile.email);
       const checkPendingRequest = async () => {
         try {
           const response = await axios.get(
@@ -60,7 +59,7 @@ const FullProfileView = () => {
   }, [profile, user]);
 
   const handleSendRequest = async () => {
-    console.log("Sending request from:", user?.email, "to:", profile?.email); // Log send request details
+    console.log("Sending request from:", user?.email, "to:", profile?.email);
     try {
       const response = await axios.post(
         `http://localhost:8000/api/friends/send-request/`,
@@ -167,22 +166,22 @@ const FullProfileView = () => {
           >
             <Card.Img
               variant="top"
-              src={profile.img}
+              src={profile.profile_picture || "default-image.jpg"}
               style={{ height: "300px", objectFit: "cover" }}
             />
             <Card.Body style={{ textAlign: "left" }}>
               <Card.Title style={{ fontSize: "2rem", fontWeight: "bold" }}>
-                {profile.name}
+                {profile.full_name}
               </Card.Title>
               <Card.Text>
-                <strong>Location:</strong> {profile.location}
+                <strong>Location:</strong> {profile.city}, {profile.state}
               </Card.Text>
               <Card.Text>
-                <strong>Skills:</strong> {profile.skills.join(", ")}
+                <strong>Skills:</strong> {Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills}
               </Card.Text>
               <Card.Text>
                 <strong>Desired Skills:</strong>{" "}
-                {profile.desiredSkills.join(", ")}
+                {Array.isArray(profile.desired_skills) ? profile.desired_skills.join(", ") : profile.desired_skills}
               </Card.Text>
               <Card.Text>
                 <strong>Rating:</strong> {profile.rating}
