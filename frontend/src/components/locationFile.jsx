@@ -4,7 +4,7 @@ import { useSpring, animated } from "react-spring";
 import CustomNavbar from "../shared/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "../auth/states";
-import { Alert, Modal, Button } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const LocationFile = () => {

@@ -106,7 +106,7 @@ const LocationProfileView = () => {
           {filteredProfiles.map((profile) => (
             <Col md={6} lg={4} key={profile.id} className="mb-4">
               <CardComponent profile={profile} />
-              <Button
+              {/* <Button
                 variant="primary"
                 onClick={() => handleViewProfile(profile)}
                 style={{
@@ -129,7 +129,7 @@ const LocationProfileView = () => {
                 }
               >
                 View Profile
-              </Button>
+              </Button> */}
             </Col>
           ))}
         </Row>
@@ -153,8 +153,7 @@ const LocationProfileView = () => {
               (e.currentTarget.style.backgroundColor = "#F83002")
             }
             onMouseOut={(e) =>
-              (e.currentTarget.style.backgroundColor = "#6A38C2")
-            }
+              (e.currentTarget.style.backgroundColor = "#6A38C2")}
           >
             Search Again
           </Button>
