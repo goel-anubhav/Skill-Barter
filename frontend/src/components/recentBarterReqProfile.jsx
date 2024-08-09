@@ -4,7 +4,7 @@ import { Container, Card, Button, Modal, Form } from "react-bootstrap";
 import CustomNavbar from "../shared/Navbar";
 import axios from "axios";
 
-const RecentBarterReqProfile = () => {
+const recentForumCards = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile } = location.state || {};
@@ -25,17 +25,18 @@ const RecentBarterReqProfile = () => {
     } else {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
-      console.log("Logged-in user email:", parsedUser.email);
+      console.log("Logged-in user email:", parsedUser.email); // Log user email
     }
   }, [navigate]);
 
   useEffect(() => {
     if (profile) {
-      console.log("Profile being viewed email:", profile.email);
+      console.log("Profile being viewed email:", profile.email); // Log profile email
+      // Check if there is a pending request for the user
       const checkPendingRequest = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:8000/api/friends/list-requests/${encodeURIComponent(profile.email)}`
+            `http://localhost:8000/api/friends/list-requests/${profile.email}`
           );
           if (
             response.data.some(
@@ -59,7 +60,7 @@ const RecentBarterReqProfile = () => {
   }, [profile, user]);
 
   const handleSendRequest = async () => {
-    console.log("Sending request from:", user?.email, "to:", profile?.email);
+    console.log("Sending request from:", user?.email, "to:", profile?.email); // Log send request details
     try {
       const response = await axios.post(
         `http://localhost:8000/api/friends/send-request/`,
@@ -166,22 +167,22 @@ const RecentBarterReqProfile = () => {
           >
             <Card.Img
               variant="top"
-              src={profile.profile_picture || "default-image.jpg"}
+              src={profile.img}
               style={{ height: "300px", objectFit: "cover" }}
             />
             <Card.Body style={{ textAlign: "left" }}>
               <Card.Title style={{ fontSize: "2rem", fontWeight: "bold" }}>
-                {profile.full_name}
+                {profile.name}
               </Card.Title>
               <Card.Text>
-                <strong>Location:</strong> {profile.city}, {profile.state}
+                <strong>Location:</strong> {profile.location}
               </Card.Text>
               <Card.Text>
-                <strong>Skills:</strong> {Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills}
+                <strong>Skills:</strong> {profile.skills.join(", ")}
               </Card.Text>
               <Card.Text>
                 <strong>Desired Skills:</strong>{" "}
-                {Array.isArray(profile.desired_skills) ? profile.desired_skills.join(", ") : profile.desired_skills}
+                {profile.desiredSkills.join(", ")}
               </Card.Text>
               <Card.Text>
                 <strong>Rating:</strong> {profile.rating}
@@ -319,4 +320,4 @@ const RecentBarterReqProfile = () => {
   );
 };
 
-export default RecentBarterReqProfile;
+export default recentForumCards;
