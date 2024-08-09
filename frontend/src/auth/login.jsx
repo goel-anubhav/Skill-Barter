@@ -14,6 +14,11 @@ function Login() {
   const [alertVariant, setAlertVariant] = useState("danger");
   const [alertMessage, setAlertMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [resetEmail, setResetEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -100,6 +105,64 @@ function Login() {
     }
   };
 
+  const handlePasswordResetRequest = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/users/password-reset/",
+        {
+          email: resetEmail,
+        }
+      );
+      setAlertVariant("success");
+      setAlertMessage(response.data.message);
+      setShowAlert(true);
+      setShowResetModal(false);
+      setShowOtpModal(true); // Show OTP modal to enter OTP and new password
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setAlertMessage(error.response.data.error);
+      } else {
+        setAlertMessage("Error during password reset request");
+      }
+      setAlertVariant("danger");
+      setShowAlert(true);
+      setShowResetModal(false);
+      console.error(
+        "Password reset error:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+
+  const handlePasswordResetConfirm = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/users/password-reset-confirm/",
+        {
+          email: resetEmail,
+          otp: otp,
+          new_password: newPassword,
+        }
+      );
+      setAlertVariant("success");
+      setAlertMessage(response.data.message);
+      setShowAlert(true);
+      setShowOtpModal(false);
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setAlertMessage(error.response.data.error);
+      } else {
+        setAlertMessage("Error during password reset confirmation");
+      }
+      setAlertVariant("danger");
+      setShowAlert(true);
+      console.error(
+        "Password reset confirmation error:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+
   return (
     <>
       <CustomNavbar className="fixed-top" />
@@ -176,6 +239,15 @@ function Login() {
                 Signup
               </a>
             </div>
+            <div className="mt-3 text-center">
+              <a
+                href="#"
+                className="text-primary"
+                onClick={() => setShowResetModal(true)}
+              >
+                Forgot Password?
+              </a>
+            </div>
           </form>
         </div>
       </div>
@@ -191,6 +263,81 @@ function Login() {
           </Button>
           <Button variant="primary" onClick={() => navigate("/registration")}>
             Go to Registration
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Password Reset Request Modal */}
+      <Modal show={showResetModal} onHide={() => setShowResetModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Password Reset</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-group">
+            <label htmlFor="resetEmail" className="form-label">
+              Enter your email to receive a password reset link:
+            </label>
+            <input
+              type="email"
+              className="form-control"
+              id="resetEmail"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              placeholder="Enter your email"
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowResetModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handlePasswordResetRequest}>
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* OTP and New Password Modal */}
+      <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Enter OTP</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-group mb-3">
+            <label htmlFor="otp" className="form-label">
+              OTP
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="otp"
+              placeholder="Enter the OTP you received"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group mb-3">
+            <label htmlFor="newPassword" className="form-label">
+              New Password
+            </label>
+            <input
+              type="password"
+              className="form-control"
+              id="newPassword"
+              placeholder="Enter your new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowOtpModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handlePasswordResetConfirm}>
+            Reset Password
           </Button>
         </Modal.Footer>
       </Modal>

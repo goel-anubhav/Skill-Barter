@@ -56,6 +56,25 @@ const CustomNavbar = () => {
     }
   };
 
+  const handleNotificationRead = async (notificationId) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/api/friends/notifications/read/${notificationId}/`
+      );
+
+      if (response.data.success) {
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notif) =>
+            notif.id === notificationId ? { ...notif, is_read: true } : notif
+          )
+        );
+        setUnreadCount((prevCount) => prevCount - 1);
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
   const handleClearAll = () => {
     setNotifications([]);
     setUnreadCount(0);
@@ -176,7 +195,9 @@ const CustomNavbar = () => {
                         <Dropdown.Item
                           key={notification.id}
                           className="d-flex align-items-center p-2"
-                          onClick={() => handleNotificationRead(notification.id)}
+                          onClick={() =>
+                            handleNotificationRead(notification.id)
+                          }
                           style={{
                             backgroundColor: notification.is_read
                               ? "#f8f9fa"
@@ -191,7 +212,9 @@ const CustomNavbar = () => {
                               {notification.message}
                             </span>
                             <small className="d-block text-muted">
-                              {new Date(notification.created_at).toLocaleString()}
+                              {new Date(
+                                notification.created_at
+                              ).toLocaleString()}
                             </small>
                           </div>
                         </Dropdown.Item>
