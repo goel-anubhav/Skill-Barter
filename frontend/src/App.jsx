@@ -20,6 +20,7 @@ import SentRequests from "./components/sentRequests";
 import FriendRequests from "./shared/Request"; // Import FriendRequests component
 import AlreadyLoggedIn from "./auth/alreadyLoggedIn";
 import skillProfileView from "./components/skillProfileView";
+import recentBarterReqProfile from "./components/recentBarterReqProfile";
 
 function App() {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -81,6 +82,10 @@ function App() {
             <Route
               path="/full-profile-view"
               element={<LoginProtectedRoute element={FullProfileView} />}
+            />
+            <Route
+              path="/recent-barter-profile-view"
+              element={<LoginProtectedRoute element={recentBarterReqProfile} />}
             />
             <Route
               path="/view-profile"

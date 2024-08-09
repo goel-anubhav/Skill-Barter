@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomNavbar from "../shared/Navbar";
-import ForumCards from "./forumCards";
+import RecentForumCards from "./recentForumCard";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 
@@ -117,15 +117,28 @@ const Dashboard = () => {
   const handleSearchBySkill = async () => {
     if (selectedSkill) {
       try {
-        const response = await axios.get(`http://localhost:8000/api/users/?skill=${encodeURIComponent(selectedSkill)}`);
+        const response = await axios.get(
+          `http://localhost:8000/api/users/?skill=${encodeURIComponent(
+            selectedSkill
+          )}`
+        );
         const data = response.data.map((user) => ({
           ...user,
           skills: user.skills ? user.skills.split(", ") : [],
-          desired_skills: user.desired_skills ? user.desired_skills.split(", ") : [],
-          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${user.email.replace("@", "%40")}/`,
+          desired_skills: user.desired_skills
+            ? user.desired_skills.split(", ")
+            : [],
+          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${user.email.replace(
+            "@",
+            "%40"
+          )}/`,
         }));
         navigate("/skill-profile-view", {
-          state: { searchType: "skill", searchTerm: selectedSkill, profiles: data },
+          state: {
+            searchType: "skill",
+            searchTerm: selectedSkill,
+            profiles: data,
+          },
         });
       } catch (error) {
         console.error("Error fetching users by skill", error);
@@ -136,15 +149,28 @@ const Dashboard = () => {
   const handleSearchByLocation = async () => {
     if (selectedLocation) {
       try {
-        const response = await axios.get(`http://localhost:8000/api/users/?state=${encodeURIComponent(selectedLocation)}`);
+        const response = await axios.get(
+          `http://localhost:8000/api/users/?state=${encodeURIComponent(
+            selectedLocation
+          )}`
+        );
         const data = response.data.map((user) => ({
           ...user,
           skills: user.skills ? user.skills.split(", ") : [],
-          desired_skills: user.desired_skills ? user.desired_skills.split(", ") : [],
-          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${user.email.replace("@", "%40")}/`,
+          desired_skills: user.desired_skills
+            ? user.desired_skills.split(", ")
+            : [],
+          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${user.email.replace(
+            "@",
+            "%40"
+          )}/`,
         }));
         navigate("/location-profile-view", {
-          state: { searchType: "location", searchTerm: selectedLocation, profiles: data },
+          state: {
+            searchType: "location",
+            searchTerm: selectedLocation,
+            profiles: data,
+          },
         });
       } catch (error) {
         console.error("Error fetching users by location", error);
@@ -189,7 +215,7 @@ const Dashboard = () => {
           <span style={{ color: "black" }}>Skill</span>
           <span style={{ color: "#F83002" }}>Barter</span>
           <span style={{ color: "black" }}>.in</span>
-        </h1        >
+        </h1>
         <p
           className="lead"
           style={{
@@ -320,9 +346,7 @@ const Dashboard = () => {
           </div>
         )}
       </div>
-
-      <ForumCards forumPosts={forumPostsList} />
-
+      <RecentForumCards forumPosts={forumPostsList} />
       <div className="container mt-5" ref={forumRef}>
         <div
           className="mt-5"
@@ -355,7 +379,7 @@ const Dashboard = () => {
                       cursor: "pointer",
                     }}
                     onClick={() =>
-                      navigate("/full-profile-view", {
+                      navigate("/recent-barter-profile-view", {
                         state: { profile: post },
                       })
                     }
