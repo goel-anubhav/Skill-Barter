@@ -9,7 +9,7 @@ import {
   Badge,
   Form,
 } from "react-bootstrap";
-import { FaBars, FaBell } from "react-icons/fa";
+import { FaBars, FaBell, FaEnvelopeOpenText, FaUserPlus } from "react-icons/fa";
 import axios from "axios";
 
 const CustomNavbar = () => {
@@ -58,11 +58,19 @@ const CustomNavbar = () => {
   };
 
   const handleSignOut = () => {
+    // Clear local storage
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+
+    // Reset states
     setIsLoggedIn(false);
     setUser(null);
+
+    // Redirect to the login page
     navigate("/login");
+
+    // Optional: Force a re-render or reload the page to clear any cached states
+    window.location.reload();
   };
 
   const handleNotificationRead = async (notificationId) => {
@@ -89,6 +97,17 @@ const CustomNavbar = () => {
   const handleClearAll = () => {
     setNotifications([]);
     setUnreadCount(0);
+  };
+
+  const renderNotificationIcon = (type) => {
+    switch (type) {
+      case "friend_request":
+        return <FaUserPlus className="text-primary" />;
+      case "message":
+        return <FaEnvelopeOpenText className="text-success" />;
+      default:
+        return <FaBell className="text-warning" />;
+    }
   };
 
   return (
@@ -158,9 +177,9 @@ const CustomNavbar = () => {
                       </Badge>
                     )}
                   </Dropdown.Toggle>
-                  <Dropdown.Menu style={{ minWidth: "300px" }}>
+                  <Dropdown.Menu style={{ minWidth: "320px" }}>
                     <div className="d-flex justify-content-between align-items-center px-3">
-                      <span>Notifications</span>
+                      <span className="font-weight-bold">Notifications</span>
                       <Button variant="link" size="sm" onClick={handleClearAll}>
                         Clear All
                       </Button>
@@ -170,26 +189,24 @@ const CustomNavbar = () => {
                       notifications.map((notification) => (
                         <Dropdown.Item
                           key={notification.id}
-                          className="d-flex align-items-center"
+                          className="d-flex align-items-center p-2"
+                          onClick={() => handleNotificationRead(notification.id)}
+                          style={{
+                            backgroundColor: notification.is_read
+                              ? "#f8f9fa"
+                              : "#e9ecef",
+                            borderRadius: "5px",
+                            marginBottom: "5px",
+                          }}
                         >
-                          <Form.Check
-                            type="checkbox"
-                            checked={notification.is_read}
-                            onChange={() =>
-                              handleNotificationRead(notification.id)
-                            }
-                            className="mr-2"
-                            style={{
-                              accentColor: notification.is_read
-                                ? "blue"
-                                : "initial",
-                            }}
-                          />
-                          <div className="d-flex flex-column">
-                            <span>{notification.message}</span>
-                            {!notification.is_read && (
-                              <small className="text-muted">Mark as read</small>
-                            )}
+                          {renderNotificationIcon(notification.type)}
+                          <div className="ml-2">
+                            <span className="font-weight-bold">
+                              {notification.message}
+                            </span>
+                            <small className="d-block text-muted">
+                              {new Date(notification.created_at).toLocaleString()}
+                            </small>
                           </div>
                         </Dropdown.Item>
                       ))
