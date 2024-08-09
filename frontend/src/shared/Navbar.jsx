@@ -7,7 +7,6 @@ import {
   Container,
   Dropdown,
   Badge,
-  Form,
 } from "react-bootstrap";
 import { FaBars, FaBell, FaEnvelopeOpenText, FaUserPlus } from "react-icons/fa";
 import axios from "axios";
@@ -57,6 +56,11 @@ const CustomNavbar = () => {
     }
   };
 
+  const handleClearAll = () => {
+    setNotifications([]);
+    setUnreadCount(0);
+  };
+
   const handleSignOut = () => {
     // Clear local storage
     localStorage.removeItem("user");
@@ -73,30 +77,12 @@ const CustomNavbar = () => {
     window.location.reload();
   };
 
-  const handleNotificationRead = async (notificationId) => {
-    try {
-      const response = await axios.patch(
-        `http://localhost:8000/api/friends/notifications/read/${notificationId}/`
-      );
-      if (response.data.success) {
-        const updatedNotifications = notifications.map((notification) =>
-          notification.id === notificationId
-            ? { ...notification, is_read: true }
-            : notification
-        );
-        setNotifications(updatedNotifications);
-        setUnreadCount(
-          updatedNotifications.filter((notif) => !notif.is_read).length
-        );
-      }
-    } catch (error) {
-      console.error("Error marking notification as read", error);
-    }
-  };
-
-  const handleClearAll = () => {
-    setNotifications([]);
-    setUnreadCount(0);
+  const handleEnquiry = () => {
+    const subject = encodeURIComponent("Enquiry about SkillBarter");
+    const body = encodeURIComponent(
+      "Hello,\n\nI have some questions about the SkillBarter platform.\n\nBest regards,\n[Your Name]"
+    );
+    window.location.href = `mailto:skillbarter.in@gmail.com?subject=${subject}&body=${body}`;
   };
 
   const renderNotificationIcon = (type) => {
@@ -241,6 +227,9 @@ const CustomNavbar = () => {
                     </Dropdown.Item>
                     <Dropdown.Item onClick={handleSignOut}>
                       Sign Out
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={handleEnquiry}>
+                      Enquiry
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
