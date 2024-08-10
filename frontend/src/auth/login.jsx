@@ -144,6 +144,12 @@ function Login() {
       setAlertVariant("success");
       setAlertMessage(response.data.message);
       setShowAlert(true);
+
+      // Set a timeout to hide the alert after 20 seconds
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 20000);
+
       setShowResetModal(false);
       setShowOtpModal(true);
     } catch (error) {
@@ -299,7 +305,7 @@ function Login() {
                     role="status"
                     aria-hidden="true"
                   />{" "}
-                  Loading...
+                  Logging in...
                 </>
               ) : (
                 "Login"
@@ -308,7 +314,11 @@ function Login() {
             {message && <p className="mt-3 text-center">{message}</p>}
             <div className="mt-3 text-center">
               <span>Don't have an account? </span>
-              <a href="/signup" className="text-primary">
+              <a
+                href="/signup"
+                className="text-primary"
+                style={{ textDecoration: "none", fontWeight: "bold" }}
+              >
                 Signup
               </a>
             </div>
@@ -316,6 +326,7 @@ function Login() {
               <a
                 href="#"
                 className="text-primary"
+                style={{ textDecoration: "none", fontWeight: "bold" }}
                 onClick={() => setShowResetModal(true)}
               >
                 Forgot Password?
@@ -340,7 +351,6 @@ function Login() {
         </Modal.Footer>
       </Modal>
 
-      {/* Password Reset Request Modal */}
       <Modal
         show={showResetModal}
         onHide={() => setShowResetModal(false)}
@@ -396,7 +406,6 @@ function Login() {
         </Modal.Footer>
       </Modal>
 
-      {/* OTP and New Password Modal */}
       <Modal
         show={showOtpModal}
         onHide={() => setShowOtpModal(false)}
