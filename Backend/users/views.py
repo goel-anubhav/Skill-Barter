@@ -72,3 +72,58 @@ class UserProfilePictureView(APIView):
             return Response({'error': 'Profile picture not found'}, status=status.HTTP_404_NOT_FOUND)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+
+from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+
+        try:
+            user = User.objects.get(email=email)
+            otp = str(random.randint(100000, 999999))
+            user.otp_code = otp
+            user.otp_expiry = timezone.now() + timedelta(minutes=10)
+            user.save()
+            # Send OTP via email (or any other method)
+            send_mail(
+                'Password Reset OTP Code',
+                f'Your OTP code for password reset is {otp}',
+                'skillbarter.in@gmail.com',
+                [user.email],
+                fail_silently=False,
+            )
+            return Response({'message': 'OTP sent to email'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+        new_password = serializer.validated_data['new_password']
+
+        try:
+            user = User.objects.get(email=email)
+            if user.otp_code == otp and timezone.now() < user.otp_expiry:
+                user.set_password(new_password)
+                user.otp_code = None  # Clear OTP after successful password reset
+                user.otp_expiry = None
+                user.save()
+                return Response({'message': 'Password reset successfully'}, status=status.HTTP_200_OK)
+            return Response({'error': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)

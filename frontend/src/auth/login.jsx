@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
-import { Modal, Button, Alert } from "react-bootstrap";
+import { Modal, Button, Alert, Spinner } from "react-bootstrap";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -19,6 +19,9 @@ function Login() {
   const [newPassword, setNewPassword] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [resetModalError, setResetModalError] = useState("");
+  const [otpModalError, setOtpModalError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -39,6 +42,26 @@ function Login() {
     return isValid;
   };
 
+  const validatePassword = (password) => {
+    const errors = [];
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long.");
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.push("Password must contain at least one uppercase letter.");
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.push("Password must contain at least one lowercase letter.");
+    }
+    if (!/[0-9]/.test(password)) {
+      errors.push("Password must contain at least one number.");
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.push("Password must contain at least one special character.");
+    }
+    return errors;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -46,14 +69,16 @@ function Login() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      // First, check if the user exists and is approved
       const usersResponse = await axios.get("http://localhost:8000/api/users/");
       const user = usersResponse.data.find((user) => user.email === email);
 
       if (!user) {
         setMessage("Please complete your registration.");
         setShowModal(true);
+        setLoading(false);
         return;
       }
 
@@ -62,10 +87,10 @@ function Login() {
           "Your account is not approved yet. Please wait for approval."
         );
         setShowModal(true);
+        setLoading(false);
         return;
       }
 
-      // Proceed with login if the user exists and is approved
       const response = await axios.post(
         "http://localhost:8000/api/users/login/",
         {
@@ -75,11 +100,10 @@ function Login() {
       );
 
       if (response.data.token) {
-        // Save token and user info in localStorage or any state management library like Redux
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
         setMessage("Login successful!");
-        navigate("/dashboard"); // Redirect to a dashboard or homepage after login
+        navigate("/dashboard");
       }
     } catch (error) {
       if (error.response && error.response.data) {
@@ -102,10 +126,14 @@ function Login() {
         "Login error:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePasswordResetRequest = async () => {
+    setLoading(true);
+
     try {
       const response = await axios.post(
         "http://localhost:8000/api/users/password-reset/",
@@ -117,24 +145,38 @@ function Login() {
       setAlertMessage(response.data.message);
       setShowAlert(true);
       setShowResetModal(false);
-      setShowOtpModal(true); // Show OTP modal to enter OTP and new password
+      setShowOtpModal(true);
     } catch (error) {
       if (error.response && error.response.data) {
-        setAlertMessage(error.response.data.error);
+        setResetModalError(error.response.data.error);
       } else {
-        setAlertMessage("Error during password reset request");
+        setResetModalError("Error during password reset request");
       }
-      setAlertVariant("danger");
-      setShowAlert(true);
-      setShowResetModal(false);
       console.error(
         "Password reset error:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePasswordResetConfirm = async () => {
+    setLoading(true);
+
+    const passwordErrors = validatePassword(newPassword);
+    if (passwordErrors.length > 0) {
+      setOtpModalError(passwordErrors.join(" "));
+      setLoading(false);
+      return;
+    }
+
+    if (!otp) {
+      setOtpModalError("OTP is required.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post(
         "http://localhost:8000/api/users/password-reset-confirm/",
@@ -150,16 +192,16 @@ function Login() {
       setShowOtpModal(false);
     } catch (error) {
       if (error.response && error.response.data) {
-        setAlertMessage(error.response.data.error);
+        setOtpModalError(error.response.data.error);
       } else {
-        setAlertMessage("Error during password reset confirmation");
+        setOtpModalError("Error during password reset confirmation");
       }
-      setAlertVariant("danger");
-      setShowAlert(true);
       console.error(
         "Password reset confirmation error:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -167,18 +209,25 @@ function Login() {
     <>
       <CustomNavbar className="fixed-top" />
       <div
+        className="d-flex justify-content-center align-items-center"
         style={{
-          height: "calc(100vh - 230px)", // Adjust based on your navbar height, 56px is common for Bootstrap
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          margin: 0,
-          paddingTop: "56px", // Adjust based on your navbar height
-          boxSizing: "border-box",
+          minHeight: "calc(100vh - 150px)",
+          paddingTop: "80px",
+          paddingBottom: "50px",
+          padding: "15px",
+          background: "linear-gradient(120deg, #fdfbfb, #ebedee)",
         }}
       >
-        <div className="card p-4" style={{ maxWidth: "600px", width: "100%" }}>
-          <h2 className="mb-4">Login</h2>
+        <div
+          className="card p-4 shadow-lg"
+          style={{
+            maxWidth: "600px",
+            width: "100%",
+            borderRadius: "15px",
+            boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <h2 className="mb-4 text-center">Login</h2>
           {showAlert && (
             <Alert
               variant={alertVariant}
@@ -229,9 +278,33 @@ function Login() {
                 <div className="invalid-feedback">{fieldErrors.password}</div>
               )}
             </div>
-            <button type="submit" className="btn btn-primary btn-block w-100">
-              Login
-            </button>
+            <Button
+              type="submit"
+              className="w-100 btn btn-primary"
+              style={{
+                backgroundColor: "#6a38c2",
+                border: "none",
+                borderRadius: "25px",
+                padding: "10px 20px",
+                transition: "background-color 0.3s ease, transform 0.3s ease",
+              }}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />{" "}
+                  Loading...
+                </>
+              ) : (
+                "Login"
+              )}
+            </Button>
             {message && <p className="mt-3 text-center">{message}</p>}
             <div className="mt-3 text-center">
               <span>Don't have an account? </span>
@@ -252,7 +325,7 @@ function Login() {
         </div>
       </div>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Registration Required</Modal.Title>
         </Modal.Header>
@@ -268,11 +341,20 @@ function Login() {
       </Modal>
 
       {/* Password Reset Request Modal */}
-      <Modal show={showResetModal} onHide={() => setShowResetModal(false)}>
+      <Modal
+        show={showResetModal}
+        onHide={() => setShowResetModal(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Password Reset</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {resetModalError && (
+            <Alert variant="danger" className="mb-3">
+              {resetModalError}
+            </Alert>
+          )}
           <div className="form-group">
             <label htmlFor="resetEmail" className="form-label">
               Enter your email to receive a password reset link:
@@ -291,18 +373,44 @@ function Login() {
           <Button variant="secondary" onClick={() => setShowResetModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handlePasswordResetRequest}>
-            Submit
+          <Button
+            variant="primary"
+            onClick={handlePasswordResetRequest}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />{" "}
+                Sending...
+              </>
+            ) : (
+              "Submit"
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
 
       {/* OTP and New Password Modal */}
-      <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)}>
+      <Modal
+        show={showOtpModal}
+        onHide={() => setShowOtpModal(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Enter OTP</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {otpModalError && (
+            <Alert variant="danger" className="mb-3">
+              {otpModalError}
+            </Alert>
+          )}
           <div className="form-group mb-3">
             <label htmlFor="otp" className="form-label">
               OTP
@@ -330,14 +438,36 @@ function Login() {
               onChange={(e) => setNewPassword(e.target.value)}
               required
             />
+            <small className="text-muted">
+              Password must be at least 8 characters long, contain at least one
+              uppercase letter, one lowercase letter, one number, and one
+              special character.
+            </small>
           </div>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowOtpModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handlePasswordResetConfirm}>
-            Reset Password
+          <Button
+            variant="primary"
+            onClick={handlePasswordResetConfirm}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />{" "}
+                Resetting...
+              </>
+            ) : (
+              "Reset Password"
+            )}
           </Button>
         </Modal.Footer>
       </Modal>

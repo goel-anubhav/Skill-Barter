@@ -32,3 +32,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
             else:
                 raise serializers.ValidationError("Invalid or expired OTP")
         return user
+
+
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)
