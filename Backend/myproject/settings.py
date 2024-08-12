@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-715*-qahq-dhier0%%z(#a2ne%q0#09lp)q^40!@wdty509%z-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ["api.skillbarter.in", "www.api.skillbarter.in"]
+ALLOWED_HOSTS=[]
 
 
 # Application definition
@@ -94,7 +95,7 @@ DATABASES = {
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'NAME': BASE_DIR / 'mbdb/db.sqlite3',
 #     }
 # }
 
