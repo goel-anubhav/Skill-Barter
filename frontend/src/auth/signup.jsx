@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
 import { Modal, Button, Spinner, Alert } from "react-bootstrap";
-import { FaExclamationTriangle, FaCheckCircle, FaKey } from "react-icons/fa";
+import { FaExclamationTriangle, FaKey } from "react-icons/fa";
 
 function SignupForm() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -26,6 +26,7 @@ function SignupForm() {
   const [errorDetails, setErrorDetails] = useState("");
   const [otpTimeout, setOtpTimeout] = useState(null);
   const [remainingTime, setRemainingTime] = useState(150); // 150 seconds
+  const [otpModalError, setOtpModalError] = useState(""); // Define the otpModalError state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -189,6 +190,11 @@ function SignupForm() {
       // Clear the OTP timeout to prevent data deletion
       clearTimeout(otpTimeout);
     } catch (error) {
+      if (error.response && error.response.data) {
+        setOtpModalError(error.response.data.error);
+      } else {
+        setOtpModalError("Error during OTP verification");
+      }
       setAlertMessage("Error verifying OTP");
       setAlertVariant("danger");
       setShowAlert(true);
@@ -361,6 +367,11 @@ function SignupForm() {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {otpModalError && (
+            <Alert variant="danger" className="mb-3">
+              {otpModalError}
+            </Alert>
+          )}
           <div className="form-group">
             <label htmlFor="otp" className="font-weight-bold">
               Enter OTP
