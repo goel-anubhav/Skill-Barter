@@ -1,4 +1,8 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import send_mail, EmailMessage
+from django.conf import settings
 
 class User(models.Model):
     full_name = models.CharField(max_length=255)
@@ -17,3 +21,34 @@ class User(models.Model):
 
     def __str__(self):
         return self.full_name
+
+# Signal to send an HTML email after a new user is created
+@receiver(post_save, sender=User)
+def send_registration_email(sender, instance, created, **kwargs):
+    if created:
+        subject = 'New User Registration - Approval Required'
+        message = f"""
+        <html>
+        <body>
+            <p>Hello Admin,</p>
+            <p>A new user has registered on the platform. Please find the details below:</p>
+            <table>
+                <tr><td><strong>Full Name</strong></td><td>: {instance.full_name}</td></tr>
+                <tr><td><strong>Email</strong></td><td>: {instance.email}</td></tr>
+                <tr><td><strong>Phone Number</strong></td><td>: {instance.phone_number}</td></tr>
+                <tr><td><strong>City</strong></td><td>: {instance.city}</td></tr>
+                <tr><td><strong>State</strong></td><td>: {instance.state}</td></tr>
+                <tr><td><strong>Qualification</strong></td><td>: {instance.qualification}</td></tr>
+                <tr><td><strong>Years of Experience</strong></td><td>: {instance.year_of_experience}</td></tr>
+                <tr><td><strong>Skills</strong></td><td>: {instance.skills}</td></tr>
+                <tr><td><strong>Desired Skills</strong></td><td>: {instance.desired_skills}</td></tr>
+            </table>
+            <p>Please review and approve the user to grant them access to the dashboard.</p>
+            <p>Thank you,<br>The Team</p>
+        </body>
+        </html>
+        """
+        admin_email = 'abhav894@gmail.com'  # Admin's email
+        email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [admin_email])
+        email.content_subtype = "html"  # Main content is now text/html
+        email.send()

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { statesOfIndia } from "./states";
+import { citiesOfIndia } from "./cities";
 import { qualifications } from "./qualifications";
 import CustomNavbar from "../shared/Navbar";
 import { skillsOptions } from "./skills";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const years = Array.from({ length: 31 }, (_, i) => ({
   value: i,
@@ -32,19 +34,46 @@ function Registration() {
   const [selectedFile1, setSelectedFile1] = useState(null);
   const [selectedFile2, setSelectedFile2] = useState(null);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [cities, setCities] = useState([]);
   const [disabledFields, setDisabledFields] = useState(false);
 
   useEffect(() => {
-    // Clear all local storage and session storage data
     localStorage.clear();
     sessionStorage.clear();
-
-    // Clear form data on component mount
     setFormData(initialFormData);
     setSelectedFile1(null);
     setSelectedFile2(null);
     setMessage("");
   }, []);
+
+  const validateForm = () => {
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    const phoneRegex = /^\d{10}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!nameRegex.test(formData.full_name)) {
+      Swal.fire("Invalid Name", "Name should contain only characters.", "error");
+      return false;
+    }
+
+    if (!phoneRegex.test(formData.phone_number)) {
+      Swal.fire("Invalid Phone Number", "Phone number must be 10 digits long.", "error");
+      return false;
+    }
+
+    if (!emailRegex.test(formData.email)) {
+      Swal.fire("Invalid Email", "Please enter a valid email address.", "error");
+      return false;
+    }
+
+    if (formData.skills.length === 0) {
+      Swal.fire("Skills Required", "Please select at least one skill.", "error");
+      return false;
+    }
+
+    return true;
+  };
 
   const handleChange = (name, value) => {
     setFormData((prevState) => ({
@@ -67,13 +96,32 @@ function Registration() {
     }
   };
 
+  const handleStateChange = (selectedOption) => {
+    handleChange("state", selectedOption);
+    setCities(citiesOfIndia[selectedOption.value] || []);
+  };
+
+  const handleSkillChange = (selectedOptions) => {
+    handleChange("skills", selectedOptions);
+    const filteredDesiredSkills = formData.desiredSkills.filter(
+      (desiredSkill) =>
+        !selectedOptions.some((skill) => skill.value === desiredSkill.value)
+    );
+    handleChange("desiredSkills", filteredDesiredSkills);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     const data = new FormData();
     data.append("full_name", formData.full_name);
     data.append("email", formData.email);
     data.append("phone_number", formData.phone_number);
-    data.append("city", formData.city);
+    data.append("city", formData.city ? formData.city.value : "");
     data.append("state", formData.state ? formData.state.value : "");
     data.append(
       "year_of_experience",
@@ -99,6 +147,7 @@ function Registration() {
     }
 
     try {
+      setLoading(true);
       const response = await axios.post(
         "http://localhost:8000/api/users/",
         data,
@@ -108,10 +157,18 @@ function Registration() {
           },
         }
       );
+      setLoading(false);
       setMessage("Registration successful!");
+      Swal.fire("Success", "Registration successful!", "success");
       navigate("/confirm-registration");
     } catch (error) {
-      setMessage("Error during registration");
+      setLoading(false);
+      const errorMessage =
+        error.response && error.response.data && error.response.data.error
+          ? error.response.data.error
+          : "Registration failed. Please try again.";
+      setMessage(errorMessage);
+      Swal.fire("Error", errorMessage, "error");
       console.error(error.response ? error.response.data : error.message);
     }
   };
@@ -126,7 +183,7 @@ function Registration() {
               <h3 className="text-center mb-4">Registration Form</h3>
               <form onSubmit={handleSubmit}>
                 <div className="row mb-3">
-                  <div className="col-md-6 mb-3 mb-md-0">
+                  <div className="col-md-6 mb-3">
                     <label htmlFor="full_name" className="form-label">
                       Full Name
                     </label>
@@ -164,7 +221,7 @@ function Registration() {
                   </div>
                 </div>
                 <div className="row mb-3">
-                  <div className="col-md-6 mb-3 mb-md-0">
+                  <div className="col-md-6 mb-3">
                     <label htmlFor="phone_number" className="form-label">
                       Phone Number
                     </label>
@@ -184,24 +241,6 @@ function Registration() {
                     />
                   </div>
                   <div className="col-md-6">
-                    <label htmlFor="city" className="form-label">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="city"
-                      name="city"
-                      value={formData.city}
-                      onChange={(e) => handleChange("city", e.target.value)}
-                      placeholder="City"
-                      autoComplete="off"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-md-6 mb-3 mb-md-0">
                     <label htmlFor="state" className="form-label">
                       State
                     </label>
@@ -213,10 +252,29 @@ function Registration() {
                         label: state,
                       }))}
                       value={formData.state}
-                      onChange={(selectedOption) =>
-                        handleChange("state", selectedOption)
-                      }
+                      onChange={handleStateChange}
                       placeholder="Select your state"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <label htmlFor="city" className="form-label">
+                      City
+                    </label>
+                    <Select
+                      id="city"
+                      name="city"
+                      options={cities.map((city) => ({
+                        value: city,
+                        label: city,
+                      }))}
+                      value={formData.city}
+                      onChange={(selectedOption) =>
+                        handleChange("city", selectedOption)
+                      }
+                      placeholder="Select your city"
                       required
                     />
                   </div>
@@ -242,7 +300,7 @@ function Registration() {
                   </div>
                 </div>
                 <div className="row mb-3">
-                  <div className="col-md-6 mb-3 mb-md-0">
+                  <div className="col-md-6 mb-3">
                     <label className="form-label">Years of Experience</label>
                     <div className="d-flex">
                       <Select
@@ -254,8 +312,13 @@ function Registration() {
                           handleChange("year_of_experience", selectedOption)
                         }
                         placeholder="Years"
-                        className="mr-2"
                         required
+                        styles={{
+                          container: (provided) => ({
+                            ...provided,
+                            width: "100%",
+                          }),
+                        }}
                       />
                     </div>
                   </div>
@@ -273,9 +336,7 @@ function Registration() {
                       className="basic-multi-select"
                       classNamePrefix="select"
                       value={formData.skills}
-                      onChange={(selectedOptions) =>
-                        handleChange("skills", selectedOptions)
-                      }
+                      onChange={handleSkillChange}
                       placeholder="Select or type your skills"
                       required
                     />
@@ -345,10 +406,17 @@ function Registration() {
                     <Select
                       isMulti
                       name="desiredSkills"
-                      options={skillsOptions.map((skill) => ({
-                        value: skill,
-                        label: skill,
-                      }))}
+                      options={skillsOptions
+                        .map((skill) => ({
+                          value: skill,
+                          label: skill,
+                        }))
+                        .filter(
+                          (option) =>
+                            !formData.skills.some(
+                              (skill) => skill.value === option.value
+                            )
+                        )}
                       className="basic-multi-select"
                       classNamePrefix="select"
                       value={formData.desiredSkills}
@@ -360,8 +428,12 @@ function Registration() {
                     />
                   </div>
                 </div>
-                <button type="submit" className="btn btn-primary w-100">
-                  Submit
+                <button
+                  type="submit"
+                  className="btn btn-primary w-100"
+                  disabled={loading}
+                >
+                  {loading ? "Registering..." : "Submit"}
                 </button>
                 {message && <p className="mt-3 text-center">{message}</p>}
               </form>

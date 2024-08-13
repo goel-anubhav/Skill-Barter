@@ -1,3 +1,4 @@
+// src/shared/Navbar.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -149,6 +150,11 @@ const CustomNavbar = () => {
             <Nav.Link as={Link} to="/locations" className="font-weight-bold">
               Locations
             </Nav.Link>
+            {!isLoggedIn && (
+              <Nav.Link as={Link} to="/about-us" className="font-weight-bold">
+                About Us
+              </Nav.Link>
+            )}
             {isLoggedIn ? (
               <>
                 <Nav.Link
