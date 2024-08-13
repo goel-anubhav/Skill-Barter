@@ -21,7 +21,6 @@ import FriendRequests from "./shared/Request"; // Import FriendRequests componen
 import AlreadyLoggedIn from "./auth/alreadyLoggedIn";
 import skillProfileView from "./components/skillProfileView";
 import recentBarterReqProfile from "./components/recentBarterReqProfile";
-import AboutUs from "./shared/aboutUs";
 
 function App() {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -32,7 +31,6 @@ function App() {
         <div className="content">
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/about-us" element={<AboutUs />} />
             <Route
               path="/login"
               element={

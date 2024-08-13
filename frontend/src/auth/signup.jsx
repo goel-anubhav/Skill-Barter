@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import CustomNavbar from "../shared/Navbar";
 import { Modal, Button, Spinner, Alert } from "react-bootstrap";
-import { FaExclamationTriangle, FaKey } from "react-icons/fa";
+import { FaExclamationTriangle, FaCheckCircle, FaKey } from "react-icons/fa";
 
 function SignupForm() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -24,23 +24,7 @@ function SignupForm() {
   const [alertMessage, setAlertMessage] = useState("");
   const [errorModal, setErrorModal] = useState(false);
   const [errorDetails, setErrorDetails] = useState("");
-  const [otpTimeout, setOtpTimeout] = useState(null);
-  const [remainingTime, setRemainingTime] = useState(150); // 150 seconds
-  const [otpModalError, setOtpModalError] = useState(""); // Define the otpModalError state
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let interval = null;
-    if (showOtpModal && remainingTime > 0) {
-      interval = setInterval(() => {
-        setRemainingTime((prevTime) => prevTime - 1);
-      }, 1000);
-    } else if (remainingTime === 0) {
-      handleOtpTimeout();
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [showOtpModal, remainingTime]);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -122,11 +106,6 @@ function SignupForm() {
       );
       setMessage("Signup successful! Please enter the OTP sent to your email.");
       setShowOtpModal(true);
-
-      // Start the OTP timer (150 seconds)
-      setRemainingTime(150); // Reset timer
-      const timeoutId = setTimeout(handleOtpTimeout, 150000);
-      setOtpTimeout(timeoutId);
     } catch (error) {
       if (error.response && error.response.data) {
         const errors = error.response.data;
@@ -152,23 +131,6 @@ function SignupForm() {
     }
   };
 
-  const handleOtpTimeout = async () => {
-    // If OTP is not verified within 150 seconds, delete the user's signup data
-    try {
-      await axios.delete(
-        `http://localhost:8000/api/users/delete/${formData.email}/`
-      );
-      setAlertMessage(
-        "OTP verification timed out. Your registration data has been deleted."
-      );
-      setAlertVariant("danger");
-      setShowAlert(true);
-      setShowOtpModal(false);
-    } catch (error) {
-      console.error("Error deleting user after OTP timeout:", error.message);
-    }
-  };
-
   const handleOtpVerification = async () => {
     setIsOtpLoading(true);
     const otpPayload = {
@@ -186,15 +148,7 @@ function SignupForm() {
       // Save user data to localStorage
       localStorage.setItem("user", JSON.stringify(formData));
       navigate("/registration");
-
-      // Clear the OTP timeout to prevent data deletion
-      clearTimeout(otpTimeout);
     } catch (error) {
-      if (error.response && error.response.data) {
-        setOtpModalError(error.response.data.error);
-      } else {
-        setOtpModalError("Error during OTP verification");
-      }
       setAlertMessage("Error verifying OTP");
       setAlertVariant("danger");
       setShowAlert(true);
@@ -367,11 +321,6 @@ function SignupForm() {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {otpModalError && (
-            <Alert variant="danger" className="mb-3">
-              {otpModalError}
-            </Alert>
-          )}
           <div className="form-group">
             <label htmlFor="otp" className="font-weight-bold">
               Enter OTP
@@ -388,9 +337,6 @@ function SignupForm() {
               required
             />
           </div>
-          <div className="text-center mt-3">
-            <p>Time remaining: {remainingTime} seconds</p>
-          </div>
           <div className="text-center">
             <Spinner
               as="span"
@@ -401,7 +347,7 @@ function SignupForm() {
               className={isOtpLoading ? "" : "d-none"}
             />
             <span className={isOtpLoading ? "ml-2" : "d-none"}>
-              Verifying OTP...
+              Sending OTP...
             </span>
           </div>
         </Modal.Body>
