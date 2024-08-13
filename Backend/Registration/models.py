@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import EmailMessage
 from django.conf import settings
 
 class User(models.Model):
@@ -9,7 +9,7 @@ class User(models.Model):
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15)
     city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)  # Corrected the typo here
     qualification = models.CharField(max_length=100)
     year_of_experience = models.IntegerField()
     skills = models.TextField()
@@ -27,6 +27,8 @@ class User(models.Model):
 def send_registration_email(sender, instance, created, **kwargs):
     if created:
         subject = 'New User Registration - Approval Required'
+        review_url = "http://api.skillbarter.in/admin"
+
         message = f"""
         <html>
         <body>
@@ -44,7 +46,8 @@ def send_registration_email(sender, instance, created, **kwargs):
                 <tr><td><strong>Desired Skills</strong></td><td>: {instance.desired_skills}</td></tr>
             </table>
             <p>Please review and approve the user to grant them access to the dashboard.</p>
-            <p>Thank you,<br>The Team</p>
+            <p><a href="{review_url}">Click here to review and approve the user</a></p>
+            <p>Thank you,<br>The Team<br>Skill Barter</p>
         </body>
         </html>
         """

@@ -14,6 +14,7 @@ import CustomNavbar from "../shared/Navbar";
 
 const SentRequests = () => {
   const [sentRequests, setSentRequests] = useState([]);
+  const [usersMap, setUsersMap] = useState({});
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -21,19 +22,33 @@ const SentRequests = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSentRequests = async () => {
+    const fetchSentRequestsAndUsers = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       try {
+        // Fetch sent requests
         const response = await axios.get(
           `http://localhost:8000/api/friends/sent-requests/${user.email}/`
         );
         setSentRequests(response.data);
+
+        // Fetch user details
+        const usersResponse = await axios.get(
+          `http://localhost:8000/api/users/`
+        );
+        const usersData = usersResponse.data.reduce((acc, user) => {
+          acc[user.email] = {
+            full_name: user.full_name,
+            phone_number: user.phone_number,
+          };
+          return acc;
+        }, {});
+        setUsersMap(usersData);
       } catch (error) {
-        console.error("Error fetching sent requests", error);
+        console.error("Error fetching data", error);
       }
     };
 
-    fetchSentRequests();
+    fetchSentRequestsAndUsers();
   }, []);
 
   const handleShowPhone = (request) => {
@@ -122,7 +137,8 @@ const SentRequests = () => {
                       color: "#6A38C2",
                     }}
                   >
-                    {request.receiver_email}
+                    {usersMap[request.receiver_email]?.full_name ||
+                      request.receiver_email}
                   </Card.Title>
                   <Card.Text
                     className="mb-4"
@@ -181,8 +197,13 @@ const SentRequests = () => {
         <Modal.Body>
           {selectedRequest && (
             <p>
-              The phone number of {selectedRequest.receiver_email} is:{" "}
-              <strong>{selectedRequest.receiver_phone}</strong>
+              The phone number of{" "}
+              {usersMap[selectedRequest.receiver_email]?.full_name ||
+                selectedRequest.receiver_email}{" "}
+              is:{" "}
+              <strong>
+                {usersMap[selectedRequest.receiver_email]?.phone_number}
+              </strong>
             </p>
           )}
         </Modal.Body>

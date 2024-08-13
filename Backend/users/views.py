@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from datetime import timedelta
 import random
+import threading
 
 class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -19,8 +20,9 @@ class UserCreateView(generics.CreateAPIView):
         user = serializer.save()
         otp = str(random.randint(100000, 999999))
         user.otp_code = otp
-        user.otp_expiry = timezone.now() + timedelta(minutes=10)
+        user.otp_expiry = timezone.now() + timedelta(seconds=150)
         user.save()
+
         # Send OTP via email (or any other method)
         send_mail(
             'Your OTP Code',
@@ -29,6 +31,17 @@ class UserCreateView(generics.CreateAPIView):
             [user.email],
             fail_silently=False,
         )
+
+        # Schedule a task to delete the user if OTP is not verified within 150 seconds
+        threading.Timer(150, self.delete_unverified_user, args=[user.id]).start()
+
+    def delete_unverified_user(self, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            if not user.is_otp_verified:
+                user.delete()
+        except User.DoesNotExist:
+            pass
 
 class UserLoginView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -56,10 +69,10 @@ class OTPVerifyView(APIView):
             if user.otp_code == otp and timezone.now() < user.otp_expiry:
                 user.is_otp_verified = True
                 user.save()
-                return Response({'message': 'OTP verified successfully'})
+                return Response({'message': 'OTP verified successfully'}, status=status.HTTP_200_OK)
             return Response({'error': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
-            return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class UserProfilePictureView(APIView):
     permission_classes = [permissions.AllowAny]

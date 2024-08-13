@@ -7,6 +7,8 @@ import {
   Badge,
   Modal,
   Form,
+  Row,
+  Col,
 } from "react-bootstrap";
 import CustomNavbar from "../shared/Navbar";
 import axios from "axios";
@@ -19,6 +21,7 @@ const FriendRequests = () => {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rating, setRating] = useState(0);
+  const [userDetails, setUserDetails] = useState({});
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -28,9 +31,26 @@ const FriendRequests = () => {
           const response = await axios.get(
             `http://localhost:8000/api/friends/list-requests/${user.email}/`
           );
-          // Sort the requests by id in descending order (assuming higher IDs are newer)
           const sortedRequests = response.data.sort((a, b) => b.id - a.id);
           setRequests(sortedRequests);
+
+          const emails = sortedRequests.map((req) => req.sender_email);
+          const usersResponse = await axios.get(
+            `http://localhost:8000/api/users/`
+          );
+          const users = usersResponse.data;
+
+          const detailsMap = {};
+          emails.forEach((email) => {
+            const user = users.find((u) => u.email === email);
+            if (user) {
+              detailsMap[email] = {
+                full_name: user.full_name,
+                phone_number: user.phone_number,
+              };
+            }
+          });
+          setUserDetails(detailsMap);
         } catch (error) {
           console.error("Error fetching requests", error);
         }
@@ -108,7 +128,11 @@ const FriendRequests = () => {
       <Container className="mt-5">
         <h2
           className="text-center mb-5"
-          style={{ fontWeight: "bold", color: "#343a40" }}
+          style={{
+            fontWeight: "bold",
+            color: "#343a40",
+            fontSize: "calc(1.5rem + 1vw)",
+          }}
         >
           Friend Requests
         </h2>
@@ -117,10 +141,11 @@ const FriendRequests = () => {
             variant={alertVariant}
             onClose={() => setAlertMessage("")}
             dismissible
-            className="text-center"
+            className="text-center mx-auto"
             style={{
               borderRadius: "15px",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              maxWidth: "90%",
             }}
           >
             {alertMessage}
@@ -129,85 +154,68 @@ const FriendRequests = () => {
         {requests.length === 0 ? (
           <p
             className="text-center"
-            style={{ color: "#6A38C2", fontWeight: "bold" }}
+            style={{
+              color: "#6A38C2",
+              fontWeight: "bold",
+              fontSize: "calc(1rem + 0.5vw)",
+            }}
           >
             No friend requests found.
           </p>
         ) : (
-          <div className="d-flex flex-column align-items-center">
+          <Row className="justify-content-center">
             {requests.map((request) => (
-              <Card
-                key={request.id}
-                className="mb-4 shadow-lg border-0 w-75"
-                style={{ borderRadius: "15px" }}
-              >
-                <Card.Body>
-                  <Card.Title
-                    className="mb-3"
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "1.25rem",
-                      color: "#6A38C2",
-                    }}
-                  >
-                    {request.sender_email}
-                  </Card.Title>
-                  <Card.Text
-                    className="mb-4"
-                    style={{ color: "#555", fontSize: "1rem" }}
-                  >
-                    {request.message}
-                  </Card.Text>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <Badge
-                      pill
-                      bg={request.status === "accepted" ? "success" : "warning"}
-                      style={{ fontSize: "0.9rem", padding: "10px 20px" }}
+              <Col xs={12} md={10} lg={8} key={request.id} className="mb-4">
+                <Card
+                  className="shadow-lg border-0"
+                  style={{ borderRadius: "15px" }}
+                >
+                  <Card.Body>
+                    <Card.Title
+                      className="mb-3"
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "calc(1.25rem + 0.3vw)",
+                        color: "#6A38C2",
+                      }}
                     >
-                      {request.status === "accepted" ? "Accepted" : "Pending"}
-                    </Badge>
-                    {request.status !== "accepted" ? (
-                      <Button
-                        variant="primary"
-                        onClick={() =>
-                          handleAcceptRequest(
-                            request.id,
-                            request.receiver_email
-                          )
+                      {userDetails[request.sender_email]?.full_name ||
+                        request.sender_email}
+                    </Card.Title>
+                    <Card.Text
+                      className="mb-4"
+                      style={{
+                        color: "#555",
+                        fontSize: "calc(0.9rem + 0.2vw)",
+                      }}
+                    >
+                      {request.message}
+                    </Card.Text>
+                    <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                      <Badge
+                        pill
+                        bg={
+                          request.status === "accepted" ? "success" : "warning"
                         }
                         style={{
-                          backgroundColor: "#F83002",
-                          border: "none",
-                          borderRadius: "30px",
+                          fontSize: "calc(0.8rem + 0.2vw)",
                           padding: "10px 20px",
-                          fontWeight: "bold",
-                          color: "white",
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                          marginBottom: "1rem",
+                          marginRight: "0",
                         }}
                       >
-                        Accept Request
-                      </Button>
-                    ) : (
-                      <div className="d-flex justify-content-end">
-                        <Button
-                          variant="info"
-                          onClick={() => handleShowPhone(request)}
-                          style={{
-                            backgroundColor: "#6A38C2",
-                            border: "none",
-                            borderRadius: "30px",
-                            padding: "10px 20px",
-                            fontWeight: "bold",
-                            color: "white",
-                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                            marginRight: "10px",
-                          }}
-                        >
-                          Show Phone Number
-                        </Button>
+                        {request.status === "accepted" ? "Accepted" : "Pending"}
+                      </Badge>
+                      {request.status !== "accepted" ? (
                         <Button
                           variant="primary"
-                          onClick={() => handleGiveRating(request)}
+                          onClick={() =>
+                            handleAcceptRequest(
+                              request.id,
+                              request.receiver_email
+                            )
+                          }
+                          className="mb-2 mb-sm-0"
                           style={{
                             backgroundColor: "#F83002",
                             border: "none",
@@ -216,17 +224,55 @@ const FriendRequests = () => {
                             fontWeight: "bold",
                             color: "white",
                             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                            fontSize: "calc(0.9rem + 0.2vw)",
                           }}
                         >
-                          Give Rating
+                          Accept Request
                         </Button>
-                      </div>
-                    )}
-                  </div>
-                </Card.Body>
-              </Card>
+                      ) : (
+                        <div className="d-flex flex-column flex-sm-row justify-content-end">
+                          <Button
+                            variant="info"
+                            onClick={() => handleShowPhone(request)}
+                            className="mb-2 mb-sm-0"
+                            style={{
+                              backgroundColor: "#6A38C2",
+                              border: "none",
+                              borderRadius: "30px",
+                              padding: "10px 20px",
+                              fontWeight: "bold",
+                              color: "white",
+                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                              fontSize: "calc(0.9rem + 0.2vw)",
+                              marginRight: "10px",
+                            }}
+                          >
+                            Show Phone Number
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={() => handleGiveRating(request)}
+                            style={{
+                              backgroundColor: "#F83002",
+                              border: "none",
+                              borderRadius: "30px",
+                              padding: "10px 20px",
+                              fontWeight: "bold",
+                              color: "white",
+                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                              fontSize: "calc(0.9rem + 0.2vw)",
+                            }}
+                          >
+                            Give Rating
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
             ))}
-          </div>
+          </Row>
         )}
       </Container>
 
@@ -237,13 +283,20 @@ const FriendRequests = () => {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Phone Number</Modal.Title>
+          <Modal.Title style={{ fontSize: "calc(1.2rem + 0.2vw)" }}>
+            Phone Number
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedRequest && (
-            <p>
-              The phone number of {selectedRequest.sender_email} is:{" "}
-              <strong>{selectedRequest.sender_phone}</strong>
+            <p style={{ fontSize: "calc(1rem + 0.2vw)" }}>
+              The phone number of{" "}
+              {userDetails[selectedRequest.sender_email]?.full_name ||
+                selectedRequest.sender_email}{" "}
+              is:{" "}
+              <strong>
+                {userDetails[selectedRequest.sender_email]?.phone_number}
+              </strong>
             </p>
           )}
         </Modal.Body>
@@ -256,6 +309,7 @@ const FriendRequests = () => {
               border: "none",
               borderRadius: "50px",
               color: "white",
+              fontSize: "calc(0.9rem + 0.2vw)",
             }}
           >
             Close
@@ -270,12 +324,20 @@ const FriendRequests = () => {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Give Rating</Modal.Title>
+          <Modal.Title style={{ fontSize: "calc(1.2rem + 0.2vw)" }}>
+            Give Rating
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group controlId="rating">
-              <Form.Label style={{ fontWeight: "bold", color: "#6A38C2" }}>
+              <Form.Label
+                style={{
+                  fontWeight: "bold",
+                  color: "#6A38C2",
+                  fontSize: "calc(1rem + 0.2vw)",
+                }}
+              >
                 Rating
               </Form.Label>
               <Form.Control
@@ -287,6 +349,7 @@ const FriendRequests = () => {
                 style={{
                   borderRadius: "10px",
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                  fontSize: "calc(1rem + 0.2vw)",
                 }}
               />
             </Form.Group>
@@ -301,6 +364,7 @@ const FriendRequests = () => {
               border: "none",
               borderRadius: "50px",
               color: "white",
+              fontSize: "calc(0.9rem + 0.2vw)",
             }}
           >
             Close
@@ -314,6 +378,7 @@ const FriendRequests = () => {
               borderRadius: "50px",
               color: "white",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              fontSize: "calc(0.9rem + 0.2vw)",
             }}
           >
             Submit Rating
