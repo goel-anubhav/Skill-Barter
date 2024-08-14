@@ -9,7 +9,7 @@ class User(models.Model):
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15)
     city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)  # Corrected the typo here
+    state = models.CharField(max_length=100)
     qualification = models.CharField(max_length=100)
     year_of_experience = models.IntegerField()
     skills = models.TextField()
@@ -27,7 +27,9 @@ class User(models.Model):
 def send_registration_email(sender, instance, created, **kwargs):
     if created:
         subject = 'New User Registration - Approval Required'
-        review_url = "http://api.skillbarter.in/admin"
+        review_url = "http://api.skillbarter.in/admin/Registration/user"
+        # review_url = "http://127.0.0.1:8000/admin/Registration/user"
+
 
         message = f"""
         <html>
@@ -51,7 +53,11 @@ def send_registration_email(sender, instance, created, **kwargs):
         </body>
         </html>
         """
-        admin_email = 'abhav894@gmail.com'  # Admin's email
-        email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [admin_email])
+
+        # List of admin emails
+        admin_emails = ['abhav894@gmail.com', 'amarjeet7@gmail.com', 'amarjeet@shivalikprints.com']
+
+        # Ensure the EmailMessage 'to' parameter is passed as a list of strings
+        email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, admin_emails)
         email.content_subtype = "html"  # Main content is now text/html
         email.send()
