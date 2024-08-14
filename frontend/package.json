@@ -19,6 +19,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "axios": "^0.24.0",
     "bootstrap": "^5.3.3",
+    "dotenv": "^16.4.5",
     "mdb-react-ui-kit": "^8.0.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",

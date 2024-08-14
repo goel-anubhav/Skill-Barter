@@ -1,14 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useState, useEffect } from "react";
 
 const CardComponent = ({ profile }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const [profilePicture, setProfilePicture] = useState("");
   const defaultImage = "https://via.placeholder.com/150"; // Placeholder image URL
-  const baseURL = "http://127.0.0.1:8000"; // Base URL for your API
+  const baseURL = `${API_URL}`; // Base URL for your API
 
   useEffect(() => {
     const fetchProfilePicture = async () => {

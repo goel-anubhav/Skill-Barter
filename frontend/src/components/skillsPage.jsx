@@ -9,11 +9,12 @@ import { skillsOptions } from "../auth/skills"; // Import as named export
 const SkillsPage = () => {
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState([]);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/users/");
+        const response = await axios.get(`${API_URL}/api/users/`);
         setProfiles(response.data);
       } catch (error) {
         console.error("Error fetching profiles:", error);

@@ -20,20 +20,19 @@ const SentRequests = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rating, setRating] = useState(0);
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchSentRequestsAndUsers = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       try {
-        // Fetch sent requests
         const response = await axios.get(
-          `http://localhost:8000/api/friends/sent-requests/${user.email}/`
+          `${API_URL}/api/friends/sent-requests/${user.email}/`
         );
         setSentRequests(response.data);
 
-        // Fetch user details
         const usersResponse = await axios.get(
-          `http://localhost:8000/api/users/`
+          `${API_URL}/api/users/`
         );
         const usersData = usersResponse.data.reduce((acc, user) => {
           acc[user.email] = {
@@ -64,7 +63,7 @@ const SentRequests = () => {
   const handleRatingSubmit = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/friends/give-rating/${selectedRequest.receiver_email}/`,
+        `${API_URL}/api/friends/give-rating/${selectedRequest.receiver_email}/`,
         { rating }
       );
       if (response.data.success) {

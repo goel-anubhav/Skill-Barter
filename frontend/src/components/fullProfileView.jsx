@@ -5,6 +5,7 @@ import CustomNavbar from "../shared/Navbar";
 import axios from "axios";
 
 const FullProfileView = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const location = useLocation();
   const navigate = useNavigate();
   const { profile } = location.state || {};
@@ -19,7 +20,7 @@ const FullProfileView = () => {
   const [user, setUser] = useState(null);
   const [profilePicture, setProfilePicture] = useState("");
   const defaultImage = "https://via.placeholder.com/150"; // Placeholder image URL
-  const baseURL = "http://127.0.0.1:8000"; // Base URL for your API
+  const baseURL = `${API_URL}`; // Base URL for your API
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -57,7 +58,7 @@ const FullProfileView = () => {
       const checkPendingRequest = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:8000/api/friends/list-requests/${profile.email}`
+            `${API_URL}/api/friends/list-requests/${profile.email}`
           );
           if (
             response.data.some(
@@ -84,7 +85,7 @@ const FullProfileView = () => {
     console.log("Sending request from:", user?.email, "to:", profile?.email);
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/friends/send-request/`,
+        `${API_URL}/api/friends/send-request/`,
         {
           sender: user.email,
           receiver: profile.email,
@@ -124,7 +125,7 @@ const FullProfileView = () => {
     if (choice === "yes") {
       try {
         const response = await axios.post(
-          `http://localhost:8000/api/friends/respond-request/${profile.id}/`,
+          `${API_URL}/api/friends/respond-request/${profile.id}/`,
           {
             status: "accepted",
             receiver: profile.email,
@@ -146,7 +147,7 @@ const FullProfileView = () => {
     } else if (choice === "no") {
       try {
         const response = await axios.patch(
-          `http://localhost:8000/api/friends/respond-request/${profile.id}/`,
+          `${API_URL}/api/friends/respond-request/${profile.id}/`,
           {
             status: "declined",
             receiver: profile.email,

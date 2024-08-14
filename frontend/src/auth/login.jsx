@@ -24,6 +24,8 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const validateForm = () => {
     let errors = {};
     let isValid = true;
@@ -72,7 +74,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const usersResponse = await axios.get("http://localhost:8000/api/users/");
+      const usersResponse = await axios.get(`${API_URL}/api/users/`);
       const user = usersResponse.data.find((user) => user.email === email);
 
       if (!user) {
@@ -92,7 +94,7 @@ function Login() {
       }
 
       const response = await axios.post(
-        "http://localhost:8000/api/users/login/",
+        `${API_URL}/api/users/login/`,
         {
           email: email,
           password: password,
@@ -136,7 +138,7 @@ function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/password-reset/",
+        `${API_URL}/api/users/password-reset/`,
         {
           email: resetEmail,
         }
@@ -185,7 +187,7 @@ function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/password-reset-confirm/",
+        `${API_URL}/api/users/password-reset-confirm/`,
         {
           email: resetEmail,
           otp: otp,

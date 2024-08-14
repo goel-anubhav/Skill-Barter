@@ -7,6 +7,7 @@ import { Modal, Button, Spinner, Alert } from "react-bootstrap";
 import { FaExclamationTriangle, FaCheckCircle, FaKey } from "react-icons/fa";
 
 function SignupForm() {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [selectedImage, setSelectedImage] = useState(null);
   const [formData, setFormData] = useState({
     full_name: "",
@@ -111,7 +112,7 @@ function SignupForm() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/signup/",
+        `${API_URL}/api/users/signup/`,
         data,
         {
           headers: {
@@ -155,7 +156,7 @@ function SignupForm() {
     // If OTP is not verified within 150 seconds, delete the user's signup data
     try {
       await axios.delete(
-        `http://localhost:8000/api/users/delete/${formData.email}/`
+        `${API_URL}/api/users/delete/${formData.email}/`
       );
       setAlertMessage(
         "OTP verification timed out. Your registration data has been deleted."
@@ -177,7 +178,7 @@ function SignupForm() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/verify-otp/",
+        `${API_URL}/api/users/verify-otp/`,
         otpPayload
       );
       setMessage("OTP verified successfully!");

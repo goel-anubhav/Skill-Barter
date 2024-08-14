@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 const ForumCards = ({ forumPosts = [] }) => {
   const navigate = useNavigate();
-
   const truncateStyle = {
     overflow: "hidden",
     whiteSpace: "nowrap",

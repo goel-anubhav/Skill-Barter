@@ -22,6 +22,8 @@ const FriendRequests = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rating, setRating] = useState(0);
   const [userDetails, setUserDetails] = useState({});
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -29,14 +31,14 @@ const FriendRequests = () => {
       if (user) {
         try {
           const response = await axios.get(
-            `http://localhost:8000/api/friends/list-requests/${user.email}/`
+            `${API_URL}/api/friends/list-requests/${user.email}/`
           );
           const sortedRequests = response.data.sort((a, b) => b.id - a.id);
           setRequests(sortedRequests);
 
           const emails = sortedRequests.map((req) => req.sender_email);
           const usersResponse = await axios.get(
-            `http://localhost:8000/api/users/`
+            `${API_URL}/api/users/`
           );
           const users = usersResponse.data;
 
@@ -63,7 +65,7 @@ const FriendRequests = () => {
   const handleAcceptRequest = async (requestId, receiverEmail) => {
     try {
       const response = await axios.patch(
-        `http://localhost:8000/api/friends/respond-request/${requestId}/`,
+        `${API_URL}/api/friends/respond-request/${requestId}/`,
         {
           status: "accepted",
           receiver: receiverEmail,
@@ -109,7 +111,7 @@ const FriendRequests = () => {
   const handleRatingSubmit = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/friends/give-rating/${selectedRequest.sender_email}/`,
+        `${API_URL}/api/friends/give-rating/${selectedRequest.sender_email}/`,
         { rating }
       );
       if (response.data.success) {

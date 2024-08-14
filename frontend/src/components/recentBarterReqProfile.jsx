@@ -8,6 +8,8 @@ const recentForumCards = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile } = location.state || {};
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
@@ -36,7 +38,7 @@ const recentForumCards = () => {
       const checkPendingRequest = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:8000/api/friends/list-requests/${profile.email}`
+            `${API_URL}/api/friends/list-requests/${profile.email}`
           );
           if (
             response.data.some(
@@ -63,7 +65,7 @@ const recentForumCards = () => {
     console.log("Sending request from:", user?.email, "to:", profile?.email); // Log send request details
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/friends/send-request/`,
+        `${API_URL}/api/friends/send-request/`,
         {
           sender: user.email,
           receiver: profile.email,
@@ -103,7 +105,7 @@ const recentForumCards = () => {
     if (choice === "yes") {
       try {
         const response = await axios.post(
-          `http://localhost:8000/api/friends/respond-request/${profile.id}/`,
+          `${API_URL}/api/friends/respond-request/${profile.id}/`,
           {
             status: "accepted",
             receiver: profile.email,
@@ -125,7 +127,7 @@ const recentForumCards = () => {
     } else if (choice === "no") {
       try {
         const response = await axios.patch(
-          `http://localhost:8000/api/friends/respond-request/${profile.id}/`,
+          `${API_URL}/api/friends/respond-request/${profile.id}/`,
           {
             status: "declined",
             receiver: profile.email,

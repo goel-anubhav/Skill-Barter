@@ -30,6 +30,8 @@ function Registration() {
     qualification: null,
   };
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState(initialFormData);
   const [selectedFile1, setSelectedFile1] = useState(null);
   const [selectedFile2, setSelectedFile2] = useState(null);
@@ -149,7 +151,7 @@ function Registration() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:8000/api/users/",
+        `${API_URL}/api/users/`,
         data,
         {
           headers: {

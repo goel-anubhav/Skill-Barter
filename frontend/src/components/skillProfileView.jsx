@@ -12,6 +12,7 @@ const SkillProfileView = () => {
   const [filteredProfiles, setFilteredProfiles] = useState(profiles);
   const [filterOptions, setFilterOptions] = useState([]);
   const [showNoProfilesModal, setShowNoProfilesModal] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     window.scrollTo(0, 0);

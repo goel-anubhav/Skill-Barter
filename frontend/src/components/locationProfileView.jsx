@@ -8,13 +8,15 @@ import CardComponent from "./cardComponent";
 const LocationProfileView = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { searchType, searchTerm, profiles } = location.state || {};
+  const { searchType, searchTerm, profiles = [] } = location.state || {};  // Default profiles to an empty array if undefined
   const [filteredProfiles, setFilteredProfiles] = useState(profiles);
   const [filterOptions, setFilterOptions] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    filterProfiles(searchTerm, searchType);
+    if (profiles.length > 0) {  // Check if profiles are not empty
+      filterProfiles(searchTerm, searchType);
+    }
   }, [searchType, searchTerm, profiles]);
 
   const filterProfiles = (term, type) => {
@@ -23,7 +25,7 @@ const LocationProfileView = () => {
       filtered = profiles.filter((profile) =>
         Array.isArray(profile.skills)
           ? profile.skills.includes(term)
-          : profile.skills.split(", ").includes(term)
+          : profile.skills?.split(", ").includes(term)
       );
     } else {
       filtered = profiles.filter((profile) => profile.state === term);
@@ -42,7 +44,7 @@ const LocationProfileView = () => {
           filteredProfiles.flatMap((profile) =>
             Array.isArray(profile.skills)
               ? profile.skills
-              : profile.skills.split(", ")
+              : profile.skills?.split(", ")
           )
         ),
       ];
@@ -58,7 +60,7 @@ const LocationProfileView = () => {
             profile.state === option &&
             (Array.isArray(profile.skills)
               ? profile.skills.includes(searchTerm)
-              : profile.skills.split(", ").includes(searchTerm))
+              : profile.skills?.split(", ").includes(searchTerm))
         )
       );
     } else {
@@ -67,7 +69,7 @@ const LocationProfileView = () => {
           (profile) =>
             (Array.isArray(profile.skills)
               ? profile.skills.includes(option)
-              : profile.skills.split(", ").includes(option)) &&
+              : profile.skills?.split(", ").includes(option)) &&
             profile.state === searchTerm
         )
       );
@@ -76,10 +78,6 @@ const LocationProfileView = () => {
 
   const handleSearchAgain = () => {
     navigate("/dashboard");
-  };
-
-  const handleViewProfile = (profile) => {
-    navigate("/full-profile-view", { state: { profile } });
   };
 
   return (
@@ -95,41 +93,47 @@ const LocationProfileView = () => {
             ? `Skill: ${searchTerm}`
             : `Location: ${searchTerm}`}
         </h2>
-        <div className="d-flex justify-content-center mb-4">
-          <Dropdown>
-            <Dropdown.Toggle
-              variant="secondary"
-              id="filter-dropdown"
-              style={{
-                backgroundColor: "#6A38C2",
-                border: "none",
-                padding: "10px 20px",
-                fontSize: "16px",
-                fontWeight: "bold",
-                borderRadius: "25px",
-                fontFamily: "Arial, sans-serif",
-              }}
-            >
-              {searchType === "skill"
-                ? "Filter by Location"
-                : "Filter by Skill"}
-            </Dropdown.Toggle>
+        {filterOptions.length > 0 && (
+          <div className="d-flex justify-content-center mb-4">
+            <Dropdown>
+              <Dropdown.Toggle
+                variant="secondary"
+                id="filter-dropdown"
+                style={{
+                  backgroundColor: "#6A38C2",
+                  border: "none",
+                  padding: "10px 20px",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  borderRadius: "25px",
+                  fontFamily: "Arial, sans-serif",
+                }}
+              >
+                {searchType === "skill"
+                  ? "Filter by Location"
+                  : "Filter by Skill"}
+              </Dropdown.Toggle>
 
-            <Dropdown.Menu>
-              {filterOptions.map((option, index) => (
-                <Dropdown.Item key={index} onClick={() => handleFilter(option)}>
-                  {option}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
+              <Dropdown.Menu>
+                {filterOptions.map((option, index) => (
+                  <Dropdown.Item key={index} onClick={() => handleFilter(option)}>
+                    {option}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+        )}
         <Row>
-          {filteredProfiles.map((profile) => (
-            <Col md={6} lg={4} key={profile.id} className="mb-4">
-              <CardComponent profile={profile} />
-            </Col>
-          ))}
+          {filteredProfiles.length > 0 ? (
+            filteredProfiles.map((profile) => (
+              <Col md={6} lg={4} key={profile.id} className="mb-4">
+                <CardComponent profile={profile} />
+              </Col>
+            ))
+          ) : (
+            <p className="text-center">No profiles found.</p>
+          )}
         </Row>
         <div className="text-center mt-4">
           <Button

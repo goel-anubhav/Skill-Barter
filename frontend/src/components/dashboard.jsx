@@ -6,6 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 
 const Dashboard = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [showSkills, setShowSkills] = useState(false);
   const [showLocations, setShowLocations] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState("");
@@ -23,20 +24,20 @@ const Dashboard = () => {
     const fetchData = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/users/");
+        const response = await axios.get(`${API_URL}/api/users/`);
         const data = response.data;
 
         const skills = new Set();
         const states = new Set();
         const formattedData = data.map((user) => {
           const emailEncoded = user.email.replace("@", "%40");
-          const profilePictureURL = `http://127.0.0.1:8000/api/users/profile-picture/${emailEncoded}/`;
+          const profilePictureURL = `${API_URL}/api/users/profile-picture/${emailEncoded}/`;
 
           // Fetch the profile picture using the encoded email
           fetch(profilePictureURL)
             .then((response) => response.json())
             .then((profileData) => {
-              const profilePicture = `http://127.0.0.1:8000${profileData.profile_picture}`;
+              const profilePicture = `${API_URL}${profileData.profile_picture}`;
               // Update the user's profile picture
               setForumPostsList((prevPosts) =>
                 prevPosts.map((post) =>
@@ -118,7 +119,7 @@ const Dashboard = () => {
     if (selectedSkill) {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/users/?skill=${encodeURIComponent(
+          `${API_URL}/api/users/?skill=${encodeURIComponent(
             selectedSkill
           )}`
         );
@@ -128,7 +129,7 @@ const Dashboard = () => {
           desired_skills: user.desired_skills
             ? user.desired_skills.split(", ")
             : [],
-          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${user.email.replace(
+          profile_picture: `${API_URL}/api/users/profile-picture/${user.email.replace(
             "@",
             "%40"
           )}/`,
@@ -150,7 +151,7 @@ const Dashboard = () => {
     if (selectedLocation) {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/users/?state=${encodeURIComponent(
+          `${API_URL}/api/users/?state=${encodeURIComponent(
             selectedLocation
           )}`
         );
@@ -160,7 +161,7 @@ const Dashboard = () => {
           desired_skills: user.desired_skills
             ? user.desired_skills.split(", ")
             : [],
-          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${user.email.replace(
+          profile_picture: `${API_URL}/api/users/profile-picture/${user.email.replace(
             "@",
             "%40"
           )}/`,

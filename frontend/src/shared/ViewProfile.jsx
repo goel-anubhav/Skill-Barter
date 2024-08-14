@@ -128,6 +128,8 @@ const ViewProfile = () => {
   const [editableField, setEditableField] = useState(null);
   const [updatedValue, setUpdatedValue] = useState("");
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -138,7 +140,7 @@ const ViewProfile = () => {
       }
 
       try {
-        const response = await axios.get("http://localhost:8000/api/users/");
+        const response = await axios.get(`${API_URL}/api/users/`);
         const matchedUser = response.data.find(
           (u) => u.email === userData.email
         );
@@ -159,7 +161,7 @@ const ViewProfile = () => {
   const handleUpdate = async () => {
     try {
       await axios.patch(
-        `http://localhost:8000/api/users/${user.id}/`, // Assuming user has an id
+        `${API_URL}/api/users/${user.id}/`, // Assuming user has an id
         { [editableField]: updatedValue }
       );
       setUser({ ...user, [editableField]: updatedValue });

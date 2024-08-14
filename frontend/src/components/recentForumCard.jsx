@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 const recentForumCards = ({ forumPosts = [] }) => {
   const navigate = useNavigate();
+  // const API_URL = import.meta.env.VITE_API_URL;
+
 
   const truncateStyle = {
     overflow: "hidden",

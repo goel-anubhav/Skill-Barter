@@ -12,6 +12,8 @@ const LocationFile = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   const springProps = useSpring({
     to: { opacity: 1, transform: "scale(1)" },
@@ -22,7 +24,7 @@ const LocationFile = () => {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/users/");
+        const response = await axios.get(`${API_URL}/api/users/`);
         const data = response.data;
 
         const uniqueLocations = new Set(data.map((user) => user.state));
@@ -39,13 +41,13 @@ const LocationFile = () => {
     if (locations.includes(state)) {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/users/?state=${encodeURIComponent(state)}`
+          `${API_URL}/api/users/?state=${encodeURIComponent(state)}`
         );
         const data = response.data.map((user) => ({
           ...user,
           skills: user.skills ? user.skills.split(", ") : [],
           desired_skills: user.desired_skills ? user.desired_skills.split(", ") : [],
-          profile_picture: `http://127.0.0.1:8000/api/users/profile-picture/${encodeURIComponent(user.email)}`,
+          profile_picture: `${API_URL}/api/users/profile-picture/${encodeURIComponent(user.email)}`,
         }));
         if (data.length > 0) {
           navigate("/location-profile-view", {

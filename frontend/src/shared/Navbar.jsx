@@ -19,6 +19,8 @@ const CustomNavbar = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -27,7 +29,7 @@ const CustomNavbar = () => {
         const parsedUser = JSON.parse(userData);
         setIsLoggedIn(true);
         setUser(parsedUser);
-        setProfilePicture(`http://localhost:8000${parsedUser.profile_picture}`);
+        setProfilePicture(`${API_URL}${parsedUser.profile_picture}`);
         fetchNotifications(parsedUser.id);
       } else {
         setIsLoggedIn(false);
@@ -48,7 +50,7 @@ const CustomNavbar = () => {
   const fetchNotifications = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/friends/notifications/${userId}/`
+        `${API_URL}/api/friends/notifications/${userId}/`
       );
       setNotifications(response.data);
       setUnreadCount(response.data.filter((notif) => !notif.is_read).length);
@@ -60,7 +62,7 @@ const CustomNavbar = () => {
   const handleNotificationRead = async (notificationId) => {
     try {
       const response = await axios.patch(
-        `http://localhost:8000/api/friends/notifications/read/${notificationId}/`
+        `${API_URL}/api/friends/notifications/read/${notificationId}/`
       );
 
       if (response.data.success) {

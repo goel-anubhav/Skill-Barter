@@ -14,6 +14,7 @@ function LandingPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [forumPosts, setForumPosts] = useState([]);
   const wrapperRef = useRef(null);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -30,9 +31,7 @@ function LandingPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/users/");
-        console.log("Users data:", response.data); // Log the users data
-
+        const response = await axios.get(`${API_URL}/api/users/`);
         const formattedData = await Promise.all(
           response.data.map(async (user) => {
             const emailEncoded = user.email.replace("@", "%40");
@@ -40,14 +39,11 @@ function LandingPage() {
 
             try {
               const profilePicResponse = await axios.get(
-                `http://127.0.0.1:8000/api/users/profile-picture/${emailEncoded}/`
+                `${API_URL}/api/users/profile-picture/${emailEncoded}/`
               );
               const profilePicturePath =
                 profilePicResponse.data.profile_picture;
-              profilePicture = `http://127.0.0.1:8000${profilePicturePath}`;
-              console.log(
-                `Fetched profile picture for ${user.email}: ${profilePicture}`
-              );
+              profilePicture = `${API_URL}${profilePicturePath}`;
             } catch (error) {
               console.error(
                 `Error fetching profile picture for ${user.email}`,
@@ -69,7 +65,6 @@ function LandingPage() {
             };
           })
         );
-        console.log("Formatted data:", formattedData); // Log the formatted data
         setForumPosts(formattedData);
       } catch (error) {
         console.error("Error fetching data", error);
