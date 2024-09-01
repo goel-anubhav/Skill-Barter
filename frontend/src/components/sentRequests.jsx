@@ -19,6 +19,7 @@ const SentRequests = () => {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -31,9 +32,7 @@ const SentRequests = () => {
         );
         setSentRequests(response.data);
 
-        const usersResponse = await axios.get(
-          `${API_URL}/api/users/`
-        );
+        const usersResponse = await axios.get(`${API_URL}/api/users/`);
         const usersData = usersResponse.data.reduce((acc, user) => {
           acc[user.email] = {
             full_name: user.full_name,
@@ -61,13 +60,25 @@ const SentRequests = () => {
   };
 
   const handleRatingSubmit = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
     try {
-      const response = await axios.post(
-        `${API_URL}/api/friends/give-rating/${selectedRequest.receiver_email}/`,
-        { rating }
-      );
+      const response = await axios.post(`${API_URL}/api/friends/rate-user/`, {
+        rater_email: user.email,
+        ratee_email: selectedRequest.receiver_email,
+        score: rating,
+        comment: comment,
+      });
       if (response.data.success) {
         alert("Rating submitted successfully!");
+
+        // Update the state to mark this request as rated
+        setSentRequests((prevRequests) =>
+          prevRequests.map((request) =>
+            request.id === selectedRequest.id
+              ? { ...request, rated: true }
+              : request
+          )
+        );
       }
       setShowRatingModal(false);
     } catch (error) {
@@ -161,21 +172,23 @@ const SentRequests = () => {
                     >
                       Show Phone Number
                     </Button>
-                    <Button
-                      variant="primary"
-                      onClick={() => handleGiveRating(request)}
-                      style={{
-                        backgroundColor: "#F83002",
-                        border: "none",
-                        borderRadius: "30px",
-                        padding: "10px 20px",
-                        fontWeight: "bold",
-                        color: "white",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                      }}
-                    >
-                      Give Rating
-                    </Button>
+                    {!request.rated && (
+                      <Button
+                        variant="primary"
+                        onClick={() => handleGiveRating(request)}
+                        style={{
+                          backgroundColor: "#F83002",
+                          border: "none",
+                          borderRadius: "30px",
+                          padding: "10px 20px",
+                          fontWeight: "bold",
+                          color: "white",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                        }}
+                      >
+                        Give Rating
+                      </Button>
+                    )}
                   </div>
                 </Card.Body>
               </Card>
@@ -243,6 +256,21 @@ const SentRequests = () => {
                 onChange={(e) => setRating(e.target.value)}
                 min="1"
                 max="5"
+                style={{
+                  borderRadius: "10px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                }}
+              />
+            </Form.Group>
+            <Form.Group controlId="comment" className="mt-3">
+              <Form.Label style={{ fontWeight: "bold", color: "#6A38C2" }}>
+                Comment
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
                 style={{
                   borderRadius: "10px",
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",

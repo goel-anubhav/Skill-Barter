@@ -11,7 +11,6 @@ const Dashboard = () => {
   const [showLocations, setShowLocations] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedDesiredSkills, setSelectedDesiredSkills] = useState([]);
   const [forumPostsList, setForumPostsList] = useState([]);
   const [skillsOptions, setSkillsOptions] = useState([]);
   const [statesOptions, setStatesOptions] = useState([]);
@@ -29,42 +28,45 @@ const Dashboard = () => {
 
         const skills = new Set();
         const states = new Set();
-        const formattedData = data.map((user) => {
-          const emailEncoded = user.email.replace("@", "%40");
-          const profilePictureURL = `${API_URL}/api/users/profile-picture/${emailEncoded}/`;
+        const formattedData = await Promise.all(
+          data.map(async (user) => {
+            const emailEncoded = user.email.replace("@", "%40");
+            const profilePictureURL = `${API_URL}/api/users/profile-picture/${emailEncoded}/`;
 
-          // Fetch the profile picture using the encoded email
-          fetch(profilePictureURL)
-            .then((response) => response.json())
-            .then((profileData) => {
-              const profilePicture = `${API_URL}${profileData.profile_picture}`;
-              // Update the user's profile picture
-              setForumPostsList((prevPosts) =>
-                prevPosts.map((post) =>
-                  post.id === user.id ? { ...post, img: profilePicture } : post
-                )
+            // Fetch the profile picture using the encoded email
+            const profileData = await fetch(profilePictureURL)
+              .then((response) => response.json())
+              .catch((error) =>
+                console.error("Error fetching profile picture:", error)
               );
-            })
-            .catch((error) =>
-              console.error("Error fetching profile picture:", error)
-            );
 
-          skills.add(user.skills);
-          states.add(user.state);
-          return {
-            id: user.id,
-            name: user.full_name,
-            location: `${user.city}, ${user.state}`,
-            email: user.email,
-            skills: user.skills ? user.skills.split(", ") : [],
-            desiredSkills: user.desired_skills
-              ? user.desired_skills.split(", ")
-              : [],
-            rating: "4.5",
-            img: "", // Placeholder until the image is fetched
-            message: `Looking to exchange ${user.skills} skills for ${user.desired_skills} knowledge.`,
-          };
-        });
+            const profilePicture = `${API_URL}${profileData.profile_picture}`;
+
+            // Fetch the scores for the current user by replacing the email in the API URL
+            const scoreResponse = await axios.get(
+              `${API_URL}/api/friends/scores/${emailEncoded}/`
+            );
+            const scores = scoreResponse.data.map((entry) => entry.score);
+            const averageScore =
+              scores.reduce((acc, score) => acc + score, 0) / scores.length;
+
+            skills.add(user.skills);
+            states.add(user.state);
+            return {
+              id: user.id,
+              name: user.full_name,
+              location: `${user.city}, ${user.state}`,
+              email: user.email,
+              skills: user.skills ? user.skills.split(", ") : [],
+              desiredSkills: user.desired_skills
+                ? user.desired_skills.split(", ")
+                : [],
+              rating: averageScore.toFixed(2) || "N/A", // Use the calculated average score or display 'N/A'
+              img: profilePicture,
+              message: `Looking to exchange ${user.skills} skills for ${user.desired_skills} knowledge.`,
+            };
+          })
+        );
         setSkillsOptions([...skills]);
         setStatesOptions([...states]);
         setForumPostsList(formattedData.filter((post) => post.id !== user.id)); // Exclude the logged-in user's own post
@@ -103,85 +105,6 @@ const Dashboard = () => {
   const handleLocationChange = (e) => {
     setSelectedLocation(e.target.value);
   };
-
-  const handleDesiredSkillsChange = (e) => {
-    const { options } = e.target;
-    const selectedValues = [];
-    for (const option of options) {
-      if (option.selected) {
-        selectedValues.push(option.value);
-      }
-    }
-    setSelectedDesiredSkills(selectedValues);
-  };
-
-  const handleSearchBySkill = async () => {
-    if (selectedSkill) {
-      try {
-        const response = await axios.get(
-          `${API_URL}/api/users/?skill=${encodeURIComponent(
-            selectedSkill
-          )}`
-        );
-        const data = response.data.map((user) => ({
-          ...user,
-          skills: user.skills ? user.skills.split(", ") : [],
-          desired_skills: user.desired_skills
-            ? user.desired_skills.split(", ")
-            : [],
-          profile_picture: `${API_URL}/api/users/profile-picture/${user.email.replace(
-            "@",
-            "%40"
-          )}/`,
-        }));
-        navigate("/skill-profile-view", {
-          state: {
-            searchType: "skill",
-            searchTerm: selectedSkill,
-            profiles: data,
-          },
-        });
-      } catch (error) {
-        console.error("Error fetching users by skill", error);
-      }
-    }
-  };
-
-  const handleSearchByLocation = async () => {
-    if (selectedLocation) {
-      try {
-        const response = await axios.get(
-          `${API_URL}/api/users/?state=${encodeURIComponent(
-            selectedLocation
-          )}`
-        );
-        const data = response.data.map((user) => ({
-          ...user,
-          skills: user.skills ? user.skills.split(", ") : [],
-          desired_skills: user.desired_skills
-            ? user.desired_skills.split(", ")
-            : [],
-          profile_picture: `${API_URL}/api/users/profile-picture/${user.email.replace(
-            "@",
-            "%40"
-          )}/`,
-        }));
-        navigate("/location-profile-view", {
-          state: {
-            searchType: "location",
-            searchTerm: selectedLocation,
-            profiles: data,
-          },
-        });
-      } catch (error) {
-        console.error("Error fetching users by location", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   return (
     <>
@@ -409,6 +332,9 @@ const Dashboard = () => {
                         <p>
                           <strong>Desired Skills:</strong>{" "}
                           {post.desiredSkills.join(", ")}
+                        </p>
+                        <p>
+                          <strong>Rating:</strong> {post.rating}
                         </p>
                       </div>
                     </div>

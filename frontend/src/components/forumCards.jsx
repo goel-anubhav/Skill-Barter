@@ -83,7 +83,7 @@ const ForumCards = ({ forumPosts = [] }) => {
                   {post.desiredSkills.join(", ")}
                 </Card.Text>
                 <Card.Text style={truncateStyle}>
-                  <strong>Rating:</strong> {post.rating}
+                  <strong>Average Score:</strong> {post.rating}
                 </Card.Text>
                 <Card.Text
                   style={{

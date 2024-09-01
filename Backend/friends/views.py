@@ -151,6 +151,18 @@ def get_notifications(request, user_id):
         return Response(serializer.data, status=200)
     except User.DoesNotExist:
         return Response({'error': 'User not found'}, status=404)    
+    
+
+@api_view(['GET'])
+def get_scores_by_email(request, email):
+    try:
+        # Fetch ratings where the email is either the rater or the ratee
+        ratings = Rating.objects.filter(rater__email=email) | Rating.objects.filter(ratee__email=email)
+        serializer = RatingSerializer(ratings, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({'error': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 

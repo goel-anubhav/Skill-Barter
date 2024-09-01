@@ -55,7 +55,7 @@ def send_registration_email(sender, instance, created, **kwargs):
         """
 
         # List of admin emails
-        admin_emails = ['abhav894@gmail.com', 'amarjeet7@gmail.com', 'amarjeet@shivalikprints.com']
+        admin_emails = ['abhav894@gmail.com', 'amarjeet7@gmail.com', 'amarjeet@shivalikprints.com','rkthakur941@gmail.com']
 
         # Ensure the EmailMessage 'to' parameter is passed as a list of strings
         email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, admin_emails)
